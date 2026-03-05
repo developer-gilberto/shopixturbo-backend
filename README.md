@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./assets/shopixturbo-logo/logo-full-shopixturbo-1536x1024.png" width="640" height="auto" alt="ShopixTurbo" />
+    <img src="./assets/logo-full-shopixturbo-1536x1024.png" width="640" height="auto" alt="ShopixTurbo" />
 </p>
 
 ## Description
