@@ -14,9 +14,11 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('HealthCheck', () => {
+    test('should return "Documentação disponível em:  /api/v1/docs"', () => {
+      expect(appController.rootRoute()).toEqual({
+        message: 'Documentação disponível em:  /api/v1/docs',
+      });
     });
   });
 });
