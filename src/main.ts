@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { RequestMethod, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -10,7 +11,7 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors({
-    origin: [env.frontendUrl],
+    origin: [env.FRONTEND_URL],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Authorization', 'Content-Type'],
@@ -40,7 +41,7 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v1/docs', app, documentFactory);
 
-  await app.listen(env.serverPort);
+  await app.listen(env.SERVER_PORT);
 }
 
 bootstrap();
