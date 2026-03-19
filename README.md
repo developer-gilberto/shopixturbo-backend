@@ -2,6 +2,8 @@
     <img src="./assets/logo-full-shopixturbo-1536x1024.png" width="640" height="auto" alt="ShopixTurbo" />
 </p>
 
+**A documentação está disponível na rota GET /api/v1/docs**
+
 ## Description
 
 Uma API RESTful para fazer a integração e consumo da API oficial da Shopee e futuramente outros marketplaces.
