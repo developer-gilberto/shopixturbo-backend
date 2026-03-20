@@ -1,4 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { constants } from '../../configs';
 import { UsersService } from '../users/users.service';
@@ -6,7 +7,10 @@ import { SignUpDTO } from './auth.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async signup(data: SignUpDTO) {
     const emailAvailable = await this.userService.checkEmailAvailability(data.email);
@@ -23,9 +27,8 @@ export class AuthService {
       password: hash,
     });
 
-    // implementar jwt
-    //   auth_token: this.jwtService.sign({ id: user.id, email: user.email}),
+    const payload = { user_id: user.id, user_name: user.name };
 
-    return user;
+    return { user_auth_token: this.jwtService.sign(payload) };
   }
 }

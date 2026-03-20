@@ -6,4 +6,5 @@ export const env = {
 
 export const constants = {
   SALT_PASSWORD: 12,
+  JWT_SECRET: process.env.JWT_SECRET as string,
 };

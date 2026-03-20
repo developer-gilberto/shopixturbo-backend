@@ -7,9 +7,7 @@ export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async getByEmail(email: string) {
-    const user = await this.usersRepository.getByEmail(email);
-    if (!user) throw new NotFoundException('User not found');
-    return user;
+    return await this.usersRepository.getByEmail(email);
   }
 
   async getById(userId: string) {
