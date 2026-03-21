@@ -12,7 +12,7 @@ export class UsersService {
 
   async getById(userId: string) {
     const user = await this.usersRepository.getById(userId);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException('Usuário não encontrado.');
     return user;
   }
 

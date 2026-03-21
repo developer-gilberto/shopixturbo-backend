@@ -1,9 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { constants } from '../../configs';
 import { UsersService } from '../users/users.service';
-import { SignUpDTO } from './auth.dto';
+import { SignInDTO, SignUpDTO } from './auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,6 +29,24 @@ export class AuthService {
 
     const payload = { user_id: user.id, user_name: user.name };
 
-    return { user_auth_token: this.jwtService.sign(payload) };
+    const token = this.jwtService.sign(payload);
+
+    return { user_auth_token: token };
+  }
+
+  async signin(data: SignInDTO) {
+    const storedUser = await this.userService.getByEmail(data.email);
+
+    if (!storedUser) throw new UnauthorizedException('Credenciais inválidas.');
+
+    const isValidPassword = await bcrypt.compare(data.password, storedUser.password);
+
+    if (!isValidPassword) throw new UnauthorizedException('Credenciais inválidas.');
+
+    const payload = { user_id: storedUser.id, user_name: storedUser.name };
+
+    const token = this.jwtService.sign(payload);
+
+    return { user_auth_token: token };
   }
 }
