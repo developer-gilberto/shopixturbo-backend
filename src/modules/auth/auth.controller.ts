@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
 import type { SignInDTO, SignUpDTO } from './auth.dto';
 import { AuthService } from './auth.service';
 
@@ -16,5 +16,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async signIn(@Body() data: SignInDTO) {
     return await this.authService.signin(data);
+  }
+
+  @Get('verify-email')
+  async verifyEmail(@Query('token') token: string) {
+    return this.authService.verifyEmail(token);
   }
 }

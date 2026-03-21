@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { SignUpDTO } from '../auth/auth.dto';
+import { Prisma } from 'src/generated/prisma/client';
 import { UsersRepository } from './users.repository';
 
 @Injectable()
@@ -22,7 +22,15 @@ export class UsersService {
     return false;
   }
 
-  async create(data: SignUpDTO) {
+  async create(data: Prisma.UserCreateInput) {
     return await this.usersRepository.create(data);
+  }
+
+  async getByVerificationToken(token: string) {
+    return await this.usersRepository.getByVerificationToken(token);
+  }
+
+  async activateAccount(userId: string) {
+    return await this.usersRepository.updateEmailStatus(userId);
   }
 }
