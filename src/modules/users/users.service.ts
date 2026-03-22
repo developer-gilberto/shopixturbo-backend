@@ -33,4 +33,8 @@ export class UsersService {
   async activateAccount(userId: string) {
     return await this.usersRepository.updateEmailStatus(userId);
   }
+
+  async updateEmailVerificationToken(userId: string, data: { token: string; expiresAt: Date }) {
+    return await this.usersRepository.updateVerificationToken(userId, data);
+  }
 }

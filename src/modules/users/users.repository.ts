@@ -46,4 +46,15 @@ export class UsersRepository {
       omit: { password: true },
     });
   }
+
+  async updateVerificationToken(userId: string, data: { token: string; expiresAt: Date }) {
+    return this.prismaClient.user.update({
+      where: { id: userId },
+      data: {
+        email_verification_token: data.token,
+        email_verification_token_expires_at: data.expiresAt,
+      },
+      omit: { password: true },
+    });
+  }
 }

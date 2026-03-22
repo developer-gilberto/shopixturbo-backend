@@ -1,11 +1,5 @@
 import * as crypto from 'node:crypto';
-import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from 'src/generated/prisma/client';
@@ -13,6 +7,7 @@ import { constants } from '../../configs';
 import { MailProducer } from '../mail/mail.producer';
 import { UsersService } from '../users/users.service';
 import { SignInDTO, SignUpDTO } from './auth.dto';
+import { VerifyEmailStatus } from './verify-email-status.enum';
 
 @Injectable()
 export class AuthService {
@@ -34,7 +29,7 @@ export class AuthService {
     const rawToken = crypto.randomBytes(32).toString('hex');
 
     const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
-    const tokenExpiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1h
+    const tokenExpiresAt = new Date(Date.now() + 1000 * 60 * 30); // 30 min
 
     const newUser: Prisma.UserCreateInput = {
       ...data,
@@ -53,27 +48,58 @@ export class AuthService {
     };
   }
 
-  async verifyEmail(token: string) {
+  async verifyEmail(token: string): Promise<VerifyEmailStatus> {
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
     const user = await this.userService.getByVerificationToken(tokenHash);
 
     if (!user) {
-      throw new BadRequestException('Token inválido.');
+      return VerifyEmailStatus.INVALID_TOKEN;
     }
 
     if (!user.email_verification_token_expires_at) {
-      throw new BadRequestException('Token inválido ou já utilizado.');
+      return VerifyEmailStatus.INVALID_TOKEN;
     }
 
     if (user.email_verification_token_expires_at < new Date()) {
-      throw new BadRequestException('Token expirado. Solicite um novo email de verificação.');
+      return VerifyEmailStatus.EXPIRED_TOKEN;
     }
 
     await this.userService.activateAccount(user.id);
 
+    return VerifyEmailStatus.VERIFIED_EMAIL;
+  }
+
+  async resendVerificationEmail(email: string) {
+    const user = await this.userService.getByEmail(email);
+
+    if (!user) {
+      return {
+        message: 'Se o email estiver cadastrado, você receberá um novo link de verificação.',
+      };
+    }
+
+    if (user.is_email_verified) {
+      return {
+        message: 'Este email já foi verificado.',
+      };
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 30); // 30 min
+
+    await this.userService.updateEmailVerificationToken(user.id, {
+      token: tokenHash,
+      expiresAt,
+    });
+
+    await this.mailProducer.sendVerificationEmail(user.email, rawToken);
+
     return {
-      message: 'Email verificado com sucesso! Você já pode fazer login.',
+      message: 'Se o email estiver cadastrado, você receberá um novo link de verificação.',
     };
   }
 
