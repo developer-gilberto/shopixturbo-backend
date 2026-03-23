@@ -1,9 +1,8 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { env } from 'src/configs';
-import type { SignInDTO, SignUpDTO } from './auth.dto';
+import { EmailDTO, SignInDTO, SignUpDTO, TokenDTO } from './auth.dto';
 import { AuthService } from './auth.service';
-import { VerifyEmailStatus } from './verify-email-status.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -22,20 +21,16 @@ export class AuthController {
   }
 
   @Get('verify-email')
-  async verifyEmail(@Query('token') token: string, @Res() response: Response) {
-    const emailVerificationStatus = await this.authService.verifyEmail(token);
+  async verifyEmail(@Query() query: TokenDTO, @Res() response: Response) {
+    const emailStatus = await this.authService.verifyEmail(query.token);
 
-    const redirectMap: Record<VerifyEmailStatus, string> = {
-      [VerifyEmailStatus.VERIFIED_EMAIL]: `${env.FRONTEND_URL}/signin?email-verification-status=${VerifyEmailStatus.VERIFIED_EMAIL}`,
-      [VerifyEmailStatus.INVALID_TOKEN]: `${env.FRONTEND_URL}/signin?email-verification-status=${VerifyEmailStatus.INVALID_TOKEN}`,
-      [VerifyEmailStatus.EXPIRED_TOKEN]: `${env.FRONTEND_URL}/signin?email-verification-status=${VerifyEmailStatus.EXPIRED_TOKEN}`,
-    };
+    const redirectUrl = `${env.FRONTEND_URL}/verification/email?status=${emailStatus}`;
 
-    return response.redirect(HttpStatus.SEE_OTHER, redirectMap[emailVerificationStatus]);
+    return response.redirect(HttpStatus.SEE_OTHER, redirectUrl);
   }
 
   @Post('resend-verification-email')
-  async resendVerificationEmail(@Body('email') email: string) {
-    return this.authService.resendVerificationEmail(email);
+  async resendVerificationEmail(@Body() body: EmailDTO) {
+    return this.authService.resendVerificationEmail(body.email);
   }
 }

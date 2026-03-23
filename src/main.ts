@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { RequestMethod, VersioningType } from '@nestjs/common';
+import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -21,6 +21,7 @@ async function bootstrap() {
     exclude: [{ path: '/', method: RequestMethod.GET }],
   });
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   const config = new DocumentBuilder()
     .setTitle('ShopixTurbo API')

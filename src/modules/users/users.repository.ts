@@ -15,14 +15,22 @@ export class UsersRepository {
   async getById(userId: string) {
     return await this.prismaClient.user.findFirst({
       where: { id: userId },
-      omit: { password: true },
+      omit: {
+        password: true,
+        email_verification_token: true,
+        email_verification_token_expires_at: true,
+      },
     });
   }
 
   async create(data: Prisma.UserCreateInput) {
     return await this.prismaClient.user.create({
       data,
-      omit: { password: true },
+      omit: {
+        password: true,
+        email_verification_token: true,
+        email_verification_token_expires_at: true,
+      },
     });
   }
 
@@ -31,7 +39,9 @@ export class UsersRepository {
       where: {
         email_verification_token: tokenHash,
       },
-      omit: { password: true },
+      omit: {
+        password: true,
+      },
     });
   }
 
@@ -43,7 +53,11 @@ export class UsersRepository {
         email_verification_token: null,
         email_verification_token_expires_at: null,
       },
-      omit: { password: true },
+      omit: {
+        password: true,
+        email_verification_token: true,
+        email_verification_token_expires_at: true,
+      },
     });
   }
 
@@ -54,7 +68,11 @@ export class UsersRepository {
         email_verification_token: data.token,
         email_verification_token_expires_at: data.expiresAt,
       },
-      omit: { password: true },
+      omit: {
+        password: true,
+        email_verification_token: true,
+        email_verification_token_expires_at: true,
+      },
     });
   }
 }
