@@ -1,7 +1,10 @@
-import { Body, Controller, Get, HttpStatus, Post, Query, Res } from '@nestjs/common';
-import { ApiResponse } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpStatus, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import type { TokenPayload } from 'src/common/types/token-payload.type';
 import { env } from 'src/configs';
+import { UserResponseDTO } from '../users/users.dto';
 import {
   EmailDTO,
   ResendVerifyEmailResponseDTO,
@@ -12,6 +15,7 @@ import {
   TokenDTO,
   VerifyEmailResponseDTO,
 } from './auth.dto';
+import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -44,5 +48,13 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.ACCEPTED, type: ResendVerifyEmailResponseDTO })
   async resendVerificationEmail(@Body() body: EmailDTO) {
     return this.authService.resendVerificationEmail(body.email);
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('jwt')
+  @ApiResponse({ status: HttpStatus.OK, type: UserResponseDTO })
+  async me(@CurrentUser() user: TokenPayload) {
+    return user;
   }
 }

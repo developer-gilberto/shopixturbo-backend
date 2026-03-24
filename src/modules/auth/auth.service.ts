@@ -2,6 +2,7 @@ import * as crypto from 'node:crypto';
 import { ConflictException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { TokenPayload } from 'src/common/types/token-payload.type';
 import { Prisma } from 'src/generated/prisma/client';
 import { constants } from '../../configs';
 import { MailProducer } from '../mail/mail.producer';
@@ -118,8 +119,15 @@ export class AuthService {
       throw new ForbiddenException('É necessário verificar seu email para fazer login.');
     }
 
-    const payload = { user_id: storedUser.id, user_name: storedUser.name };
-    const token = this.jwtService.sign(payload);
+    const payload = {
+      id: storedUser.id,
+      name: storedUser.name,
+      email: storedUser.email,
+      role: storedUser.role,
+      is_email_verified: storedUser.is_email_verified,
+    };
+
+    const token = this.jwtService.sign<TokenPayload>(payload);
 
     return { user_auth_token: token };
   }
