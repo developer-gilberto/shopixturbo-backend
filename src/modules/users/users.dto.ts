@@ -1,5 +1,12 @@
-import { SignUpDTO } from '../auth/auth.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { UserRole } from 'src/generated/prisma/enums';
 
-export interface User extends SignUpDTO {
-  id: string;
+export class UserResponseDTO {
+  @ApiProperty() user_id: string;
+  @ApiProperty() name: string;
+  @ApiProperty() email: string;
+  @ApiProperty() role: UserRole;
+  @ApiProperty() is_email_verified: boolean;
+  @ApiProperty() created_at: Date;
+  @ApiProperty() updated_at: Date;
 }

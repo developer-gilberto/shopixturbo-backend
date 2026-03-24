@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { HttpStatus } from '@nestjs/common';
+import { ApiProperty, ApiResponseOptions } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsHexadecimal, IsNotEmpty, IsString, Length, MaxLength, MinLength } from 'class-validator';
 
@@ -26,6 +27,13 @@ export class SignUpDTO {
   password: string;
 }
 
+export class SignUpResponseDTO {
+  @ApiProperty({
+    example: 'Enviamos um email para gilberto@email.com. Verifique sua caixa de entrada para ativar sua conta.',
+  })
+  message: string;
+}
+
 export class SignInDTO {
   @ApiProperty({ description: 'User email', example: 'julia@example.com' })
   @IsNotEmpty({ message: 'Email é obrigatório' })
@@ -40,6 +48,31 @@ export class SignInDTO {
   @MinLength(6, { message: 'Senha deve ter pelo menos 6 caracteres' })
   @MaxLength(128, { message: 'Senha deve ter no máximo 128 caracteres' })
   password: string;
+}
+
+export class SignInResponseDTO {
+  @ApiProperty() user_auth_token: string;
+}
+
+export const VerifyEmailResponseDTO: ApiResponseOptions = {
+  status: HttpStatus.SEE_OTHER,
+  description: 'Redireciona para o frontend com o status da verificação',
+  headers: {
+    Location: {
+      description: 'URL de redirecionamento com o status da verificação',
+      schema: {
+        type: 'string',
+        example: 'https://frontend.com/verification/email?status=success',
+      },
+    },
+  },
+};
+
+export class ResendVerifyEmailResponseDTO {
+  @ApiProperty({
+    example: 'Se o email estiver cadastrado, você receberá um novo link de verificação.',
+  })
+  message: string;
 }
 
 export class EmailDTO {

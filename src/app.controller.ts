@@ -17,6 +17,7 @@ export class AppController {
           type: 'string',
         },
       },
+      example: 'Documentação disponível em:  /api/v1/docs',
     },
   })
   @HttpCode(HttpStatus.OK)
