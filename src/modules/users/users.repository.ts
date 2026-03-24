@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { cache } from 'src/configs';
+import { PrismaService } from 'src/database/prisma.service';
+import { RedisService } from 'src/database/redis.service';
 import { Prisma } from 'src/generated/prisma/client';
-import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class UsersRepository {
-  constructor(private readonly prismaClient: PrismaService) {}
+  constructor(
+    private readonly prismaClient: PrismaService,
+    private readonly redisService: RedisService,
+  ) {}
 
   async getByEmail(email: string) {
     return await this.prismaClient.user.findUnique({
@@ -13,7 +18,7 @@ export class UsersRepository {
   }
 
   async getById(userId: string) {
-    return await this.prismaClient.user.findFirst({
+    return await this.prismaClient.user.findUnique({
       where: { id: userId },
       omit: {
         password: true,
@@ -46,7 +51,7 @@ export class UsersRepository {
   }
 
   async updateEmailStatus(userId: string) {
-    return this.prismaClient.user.update({
+    const user = await this.prismaClient.user.update({
       where: { id: userId },
       data: {
         is_email_verified: true,
@@ -59,6 +64,10 @@ export class UsersRepository {
         email_verification_token_expires_at: true,
       },
     });
+
+    await this.redisService.delete(cache.ROUTE_ME_KEY(userId));
+
+    return user;
   }
 
   async updateVerificationToken(userId: string, data: { token: string; expiresAt: Date }) {

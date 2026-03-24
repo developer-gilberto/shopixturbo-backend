@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from 'src/generated/prisma/enums';
 
 export class UserResponseDTO {
-  @ApiProperty() user_id: string;
+  @ApiProperty() id: string;
   @ApiProperty() name: string;
   @ApiProperty() email: string;
   @ApiProperty() role: UserRole;

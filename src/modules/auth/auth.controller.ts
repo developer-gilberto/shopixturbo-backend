@@ -54,7 +54,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('jwt')
   @ApiResponse({ status: HttpStatus.OK, type: UserResponseDTO })
-  async me(@CurrentUser() user: TokenPayload) {
-    return user;
+  async me(@CurrentUser() user: TokenPayload): Promise<UserResponseDTO> {
+    return this.authService.me(user.id);
   }
 }

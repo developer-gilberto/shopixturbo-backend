@@ -17,3 +17,8 @@ export const constants = {
   MAIL_QUEUE: 'mail',
   SEND_VERIFICATION_EMAIL_JOB: 'send-verification-email',
 };
+
+export const cache = {
+  ROUTE_ME_TTL: 60 * 5, // 5 minutos
+  ROUTE_ME_KEY: (userId: string) => `user:me:${userId}`,
+};

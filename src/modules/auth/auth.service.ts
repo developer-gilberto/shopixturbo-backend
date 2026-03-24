@@ -131,4 +131,8 @@ export class AuthService {
 
     return { user_auth_token: token };
   }
+
+  async me(userId: string) {
+    return await this.userService.getById(userId);
+  }
 }
