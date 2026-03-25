@@ -4,7 +4,7 @@ import { Request } from 'express';
 import { TokenPayload } from 'src/common/types/token-payload.type';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class JwtAuthGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

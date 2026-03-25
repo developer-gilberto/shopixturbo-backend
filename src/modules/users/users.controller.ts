@@ -1,11 +1,11 @@
 import { Controller, Get, HttpStatus, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
-import { AuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UserResponseDTO } from './users.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
-@UseGuards(AuthGuard)
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth('jwt')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}

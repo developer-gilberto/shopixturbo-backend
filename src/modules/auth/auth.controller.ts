@@ -4,6 +4,7 @@ import type { Response } from 'express';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { TokenPayload } from 'src/common/types/token-payload.type';
 import { env } from 'src/configs';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UserResponseDTO } from '../users/users.dto';
 import {
   EmailDTO,
@@ -15,7 +16,6 @@ import {
   TokenDTO,
   VerifyEmailResponseDTO,
 } from './auth.dto';
-import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -51,7 +51,7 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('jwt')
   @ApiResponse({ status: HttpStatus.OK, type: UserResponseDTO })
   async me(@CurrentUser() user: TokenPayload): Promise<UserResponseDTO> {
