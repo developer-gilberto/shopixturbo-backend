@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
+import { env } from 'src/configs/env.config';
 
 @Injectable()
 export class RedisService {
@@ -7,8 +8,8 @@ export class RedisService {
 
   constructor() {
     this.client = new Redis({
-      host: process.env.REDIS_HOST,
-      port: Number(process.env.REDIS_PORT),
+      host: env.REDIS_HOST,
+      port: env.REDIS_PORT,
     });
   }
 

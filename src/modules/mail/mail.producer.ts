@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import { constants } from 'src/configs';
+import { constants } from 'src/configs/constants.config';
 
 @Injectable()
 export class MailProducer {

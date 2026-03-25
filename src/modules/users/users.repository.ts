@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { cache } from 'src/configs';
+import { cache } from 'src/configs/cache.config';
 import { PrismaService } from 'src/database/prisma.service';
 import { RedisService } from 'src/database/redis.service';
 import { Prisma } from 'src/generated/prisma/client';

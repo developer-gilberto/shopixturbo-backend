@@ -3,9 +3,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { env } from './configs/env.config';
 import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
+import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { MailModule } from './modules/mail/mail.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -14,13 +16,14 @@ import { MailModule } from './modules/mail/mail.module';
     }),
     BullModule.forRoot({
       connection: {
-        host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT),
+        host: env.REDIS_HOST,
+        port: env.REDIS_PORT,
       },
     }),
     AuthModule,
     UsersModule,
     MailModule,
+    IntegrationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

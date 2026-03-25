@@ -1,7 +1,8 @@
 import { join } from 'node:path';
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { constants, env } from 'src/configs';
+import { constants } from 'src/configs/constants.config';
+import { env } from 'src/configs/env.config';
 import { getVerificationEmailTemplate } from './templates/email-verification.template';
 
 @Injectable()
@@ -22,7 +23,7 @@ export class MailService {
     const htmlEmailVerification = getVerificationEmailTemplate({
       verificationUrl,
       appName: constants.APPLICATION_NAME,
-      tokenExpirationInText: constants.EMAIL_VERIFICATION_TOKEN_EXPIRATION_IN_TEXT!,
+      tokenExpirationInText: constants.TOKEN_EXP_IN_PLAIN_TEXT!,
     });
 
     await this.transporter.sendMail({

@@ -3,8 +3,8 @@ import { ConflictException, ForbiddenException, Injectable, UnauthorizedExceptio
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { TokenPayload } from 'src/common/types/token-payload.type';
+import { constants } from 'src/configs/constants.config';
 import { Prisma } from 'src/generated/prisma/client';
-import { constants } from '../../configs';
 import { MailProducer } from '../mail/mail.producer';
 import { UsersService } from '../users/users.service';
 import { SignInDTO, SignUpDTO } from './auth.dto';

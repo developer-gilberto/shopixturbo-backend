@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { TokenPayload } from 'src/common/types/token-payload.type';
-import { env } from 'src/configs';
+import { env } from 'src/configs/env.config';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UserResponseDTO } from '../users/users.dto';
 import {

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { cache } from 'src/configs';
+import { cache } from 'src/configs/cache.config';
 import { RedisService } from 'src/database/redis.service';
 import { Prisma } from 'src/generated/prisma/client';
 import { UserResponseDTO } from './users.dto';
