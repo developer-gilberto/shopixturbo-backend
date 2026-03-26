@@ -72,7 +72,7 @@ ShopixTurbo Backend é uma API RESTful desenvolvida com NestJS para integração
 | Segurança | Helmet | ^8.1.0 |
 | Linting | Biome | 2.4.5 |
 | Testes | Jest | ^30.0.0 |
-| Package Manager | pnpm | - |
+| Package Manager | pnpm | 10.30.3 |
 
 ---
 
