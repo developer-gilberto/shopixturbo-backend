@@ -18,7 +18,7 @@ export class ShopeeController {
     return { auth_url: authUrl };
   }
 
-  @Get('callback/shopee/access-token')
+  @Get('shopee/callback/access-token')
   async handleCallbackGetToken(@CurrentUser() user: TokenPayload, @Query() data: CallbackGetTokenDTO) {
     return await this.shopeeService.handleCallback(user.id, data);
   }
