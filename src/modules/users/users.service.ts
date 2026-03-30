@@ -17,7 +17,7 @@ export class UsersService {
   }
 
   async getById(userId: string) {
-    const cacheKey = cache.ROUTE_ME_KEY(userId);
+    const cacheKey = cache.userMeKey(userId);
 
     const cached = await this.redisService.get<UserResponseDTO>(cacheKey);
     if (cached) return cached;
@@ -25,7 +25,7 @@ export class UsersService {
     const user = await this.usersRepository.getById(userId);
     if (!user) throw new NotFoundException('Usuário não encontrado.');
 
-    await this.redisService.set(cacheKey, user, cache.ROUTE_ME_TTL);
+    await this.redisService.set(cacheKey, user, cache.userMeTTL);
 
     return user;
   }

@@ -65,7 +65,7 @@ export class UsersRepository {
       },
     });
 
-    await this.redisService.delete(cache.ROUTE_ME_KEY(userId));
+    await this.redisService.delete(cache.userMeKey(userId));
 
     return user;
   }
