@@ -21,10 +21,56 @@ model User {
   created_at                          DateTime  @default(now())
   updated_at                          DateTime  @updatedAt
 
+  shops Shop[]
+
   @@map("users")
 }
 
 enum UserRole {
   USER
   ADMIN
+}
+
+model Shop {
+  id                       String    @id @default(uuid())
+  name                     String
+  description              String?
+  shop_logo                String?
+  marketplace              MarketplaceType
+  external_id              String?
+  authorization_expiration DateTime?
+  deleted_at               DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  marketplace_token MarketplaceToken?
+
+  @@index([user_id, marketplace])
+  @@index([user_id])
+  @@map("shops")
+}
+
+enum MarketplaceType {
+  SHOPEE
+  MERCADO_LIVRE
+  AMAZON
+}
+
+model MarketplaceToken {
+  id            String    @id @default(uuid())
+  access_token  String
+  refresh_token String?
+  expires_at    DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  shop_id String @unique
+  shop    Shop   @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+
+  @@map("marketplace_tokens")
 }
