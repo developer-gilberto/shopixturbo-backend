@@ -4,9 +4,11 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { env } from './configs/env.config';
+import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { ShopeeModule } from './modules/integrations/shopee/shopee.module';
 import { MailModule } from './modules/mail/mail.module';
+import { ShopsModule } from './modules/shops/shops.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -20,10 +22,12 @@ import { UsersModule } from './modules/users/users.module';
         port: env.REDIS_PORT,
       },
     }),
+    DatabaseModule,
     AuthModule,
     UsersModule,
     MailModule,
-    IntegrationsModule,
+    ShopeeModule,
+    ShopsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
