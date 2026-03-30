@@ -80,14 +80,14 @@ export class ShopeeService {
     });
 
     await this.redisService.set(
-      cache.shopeeAccessTokenKey(data.shop_id),
+      cache.shopeeAccessTokenKey(shop.id),
       permanentTokens.access_token,
       cache.shopeeAccessTokenTTL, // 3 horas em segundos
     );
 
     const shopData = {
       id: shop.id,
-      name: shopProfile.shop_name,
+      name: shopInfo.shop_name,
       description: shopProfile.description,
       shop_logo: shopProfile.shop_logo,
       marketplace: shop.marketplace,
