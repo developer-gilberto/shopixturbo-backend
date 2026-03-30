@@ -63,6 +63,6 @@
     }
   ],
   "files": {
-    "includes": ["src/**/*.ts"]
+    "includes": ["src/**/*.ts", "!src/generated", "!dist", "!build", "!node_modules"]
   }
 }

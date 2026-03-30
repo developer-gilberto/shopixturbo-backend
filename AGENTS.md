@@ -1,11 +1,7 @@
-# ShopixTurbo backend
-
-ShopixTurbo é uma API RESTful para integração e consumo da API oficial da Shopee e futuras integrações com outros marketplaces.
-
 ## 📌 Objetivo
 
-Este documento define as regras, padrões e decisões arquiteturais do projeto **ShopixTurbo**.
-Toda IA ou desenvolvedor deve seguir estas diretrizes para manter consistência, segurança e escalabilidade.
+Este documento define as regras, padrões e decisões arquiteturais deste projeto (**ShopixTurbo**).
+Toda inteligência artificial ou desenvolvedor deve seguir estas diretrizes para manter consistência, segurança e escalabilidade.
 
 ---
 
@@ -42,6 +38,7 @@ Cada domínio deve conter:
 - Repository é a única camada que deve interagir com o banco de dados
 - Regras devem ser reutilizáveis
 - Sempre analisar o código gerado em busca de vulnerabilidades e informar caso for encontrada
+- Nunca acessar `process.env` diretamente fora de configs/
 
 ---
 
@@ -80,6 +77,7 @@ Cada domínio deve conter:
 - Variáveis de ambiente devem ser validadas via arquivos de configuração (`env.config.ts`, etc.)
 - Nunca acessar `process.env` diretamente fora da camada de config
 - Dados de entrada devem ser validados (DTO ou Zod)
+- Parâmetros de url e requisições devem ser escritos em snake_case
 
 ---
 
@@ -138,6 +136,10 @@ Cada domínio deve conter:
 - Evitar queries duplicadas ou desnecessárias
 - Acesso ao banco deve ocorrer apenas via repository
 
+### Regras
+
+- Os nomes de todas as tabelas, colunas e linhas devem ser escritas no banco de dados em snake_case
+
 ---
 
 ## 📧 Sistema de Email
@@ -183,6 +185,12 @@ Seguir Conventional Commits:
 
 ---
 
+## Testes
+
+- Sempre use variáveis de ambiente nos testes com valores falsos/mockados no arquivo .env.test
+
+---
+
 ## 📈 Evolução Esperada
 
 - Testes automatizados (unitários, integração e e2e)
@@ -197,4 +205,4 @@ Seguir Conventional Commits:
 ## 🧠 Observação Final
 
 Este projeto segue padrões de nível profissional.
-Qualquer alteração estrutural deve atualizar este documento, SKILLS.md e README.md.
+Qualquer alteração estrutural deve atualizar este documento(AGENTS.md), SKILL.md e README.md.
