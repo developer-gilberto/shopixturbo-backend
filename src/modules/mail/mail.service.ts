@@ -18,12 +18,12 @@ export class MailService {
   });
 
   async sendVerificationEmail(to: string, token: string): Promise<void> {
-    const verificationUrl = `${env.API_URL}/auth/verify-email?token=${token}`;
+    const verificationUrl = `${env.BASE_API_URL}/auth/verify-email?token=${token}`;
 
     const htmlEmailVerification = getVerificationEmailTemplate({
       verificationUrl,
       appName: constants.APPLICATION_NAME,
-      tokenExpirationInText: constants.TOKEN_EXP_IN_PLAIN_TEXT!,
+      tokenExpirationInText: constants.EMAIL_TOKEN_EXP_IN_PLAIN_TEXT,
     });
 
     await this.transporter.sendMail({
