@@ -56,13 +56,14 @@ export class SignInResponseDTO {
 
 export const VerifyEmailResponseDTO: ApiResponseOptions = {
   status: HttpStatus.SEE_OTHER,
-  description: 'Redireciona para o frontend com o status da verificação',
+  description:
+    'Redireciona para o frontend com o parâmetro query (status) contendo o status da verificação. [verified_email | invalid_token | expired_token]',
   headers: {
     Location: {
       description: 'URL de redirecionamento com o status da verificação',
       schema: {
         type: 'string',
-        example: 'https://frontend.com/verification/email?status=success',
+        example: 'https://frontend.com/verification/email?status=verified_email',
       },
     },
   },
