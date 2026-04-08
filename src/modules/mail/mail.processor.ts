@@ -24,7 +24,7 @@ export class MailProcessor extends WorkerHost {
 
   private async handleSendVerificationEmail(job: Job): Promise<void> {
     const { to, token } = job.data;
-    this.logger.log(`Processando envio de email para ${to} (tentativa ${job.attemptsMade + 1})`);
+    this.logger.log(`Processando envio de email para "${to}" (${job.attemptsMade + 1}° tentativa)`);
     await this.mailService.sendVerificationEmail(to, token);
   }
 }

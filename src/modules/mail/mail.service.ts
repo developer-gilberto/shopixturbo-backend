@@ -1,24 +1,56 @@
 import { join } from 'node:path';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { constants } from 'src/configs/constants.config';
-import { env } from 'src/configs/env.config';
+import { Env } from 'src/configs/env.schema';
 import { getVerificationEmailTemplate } from './templates/email-verification.template';
 
 @Injectable()
-export class MailService {
+export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
-  private transporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: env.SMTP_PORT,
-    auth: {
-      user: env.SMTP_USER,
-      pass: env.SMTP_PASS,
-    },
-  });
+
+  private readonly transporter: nodemailer.Transporter;
+  private readonly baseApiUrl: string;
+  private readonly smtpUser: string;
+  private readonly smtpHost: string;
+  private readonly smtpPort: number;
+  private readonly smtpPass: string;
+  private readonly isProd: boolean;
+
+  constructor(private readonly configService: ConfigService<Env>) {
+    this.baseApiUrl = this.configService.getOrThrow<string>('BASE_API_URL');
+    this.smtpUser = this.configService.getOrThrow<string>('SMTP_USER');
+    this.smtpHost = this.configService.getOrThrow<string>('SMTP_HOST');
+    this.smtpPort = this.configService.getOrThrow<number>('SMTP_PORT');
+    this.smtpPass = this.configService.getOrThrow<string>('SMTP_PASS');
+    this.isProd = this.configService.getOrThrow<string>('NODE_ENV') === 'production';
+
+    this.transporter = nodemailer.createTransport({
+      host: this.smtpHost,
+      port: this.smtpPort,
+      secure: this.smtpPort === 465,
+      auth: {
+        user: this.smtpUser,
+        pass: this.smtpPass,
+      },
+    });
+  }
+
+  async onModuleInit() {
+    try {
+      await this.transporter.verify();
+      this.logger.log(
+        this.isProd ? 'Servidor SMTP conectado!' : `Servidor SMTP conectado em ${this.smtpHost}:${this.smtpPort}`,
+      );
+    } catch (err) {
+      this.logger.error('Falha ao conectar no servidor SMTP ', err);
+      process.exit(1);
+    }
+  }
 
   async sendVerificationEmail(to: string, token: string): Promise<void> {
-    const verificationUrl = `${env.BASE_API_URL}/auth/verify-email?token=${token}`;
+    const verificationUrl = `${this.baseApiUrl}/api/v1/auth/verify-email?token=${token}`;
 
     const htmlEmailVerification = getVerificationEmailTemplate({
       verificationUrl,
@@ -27,7 +59,7 @@ export class MailService {
     });
 
     await this.transporter.sendMail({
-      from: `"${constants.APPLICATION_NAME}" <${env.SMTP_USER}>`,
+      from: `${constants.APPLICATION_NAME} <${this.smtpUser}>`,
       to,
       subject: `${constants.APPLICATION_NAME} - Confirme seu email.`,
       html: htmlEmailVerification,
@@ -40,6 +72,6 @@ export class MailService {
       ],
     });
 
-    this.logger.log(`Email de verificação enviado para ${to}`);
+    this.logger.log(`Email de verificação enviado para "${to}"`);
   }
 }
