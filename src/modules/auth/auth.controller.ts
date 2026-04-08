@@ -1,9 +1,10 @@
 import { Body, Controller, Get, HttpStatus, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { TokenPayload } from 'src/common/types/token-payload.type';
-import { env } from 'src/configs/env.config';
+import { Env } from 'src/configs/env.schema';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UserResponseDTO } from '../users/users.dto';
 import {
@@ -20,7 +21,10 @@ import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService<Env>,
+  ) {}
 
   @Post('signup')
   @ApiResponse({ status: HttpStatus.CREATED, type: SignUpResponseDTO })
@@ -39,7 +43,9 @@ export class AuthController {
   async verifyEmail(@Query() query: TokenDTO, @Res() response: Response) {
     const emailStatus = await this.authService.verifyEmail(query.token);
 
-    const redirectUrl = `${env.FRONTEND_URL}/verification/email?status=${emailStatus}`;
+    const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
+
+    const redirectUrl = `${frontendUrl}/verification/email?status=${emailStatus}`;
 
     return response.redirect(HttpStatus.SEE_OTHER, redirectUrl);
   }

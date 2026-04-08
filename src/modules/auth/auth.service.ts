@@ -13,8 +13,8 @@ import { VerifyEmailStatus } from './verify-email-status.enum';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly userService: UsersService,
     private readonly mailProducer: MailProducer,
   ) {}
 
@@ -45,7 +45,7 @@ export class AuthService {
     await this.mailProducer.sendVerificationEmail(data.email, rawToken);
 
     return {
-      message: `Enviamos um email para ${data.email}. Verifique sua caixa de entrada para ativar sua conta.`,
+      message: `Enviamos um email para '${data.email}'. Verifique sua caixa de entrada para ativar sua conta.`,
     };
   }
 

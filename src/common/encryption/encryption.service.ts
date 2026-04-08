@@ -1,14 +1,15 @@
 import * as crypto from 'node:crypto';
 import { Injectable } from '@nestjs/common';
-import { env } from 'src/configs/env.config';
+import { ConfigService } from '@nestjs/config';
+import { Env } from 'src/configs/env.schema';
 
 @Injectable()
 export class EncryptionService {
   private readonly algorithm = 'aes-256-gcm';
   private readonly key: Buffer;
 
-  constructor() {
-    const encryptionKey = env.ENCRYPTION_KEY;
+  constructor(private readonly configService: ConfigService<Env>) {
+    const encryptionKey = this.configService.getOrThrow<string>('ENCRYPTION_KEY');
     if (!encryptionKey || encryptionKey.length !== 64) {
       throw new Error('ENCRYPTION_KEY must be a 64-character hex string (32 bytes)');
     }
