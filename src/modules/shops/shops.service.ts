@@ -1,11 +1,12 @@
-import { HttpException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { HttpException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { cache } from 'src/configs/cache.config';
 import { Env } from 'src/configs/env.schema';
 import { RedisService } from 'src/database/redis.service';
+import { ShopStatus } from 'src/generated/prisma/enums';
 import { ShopeeAuthService } from '../integrations/shopee/auth/shopee-auth.service';
 import { ShopsRepository } from './shops.repository';
-import { ShopCreate, ShopInfo, ShopProfile } from './shops.type';
+import { ShopCreate, ShopFull, ShopInfo, ShopProfile } from './shops.type';
 
 @Injectable()
 export class ShopsService {
@@ -78,6 +79,37 @@ export class ShopsService {
     return data.response;
   }
 
+  async getShopFullByExternalIdAndUserId(externalId: string, userId: string) {
+    const cacheKey = cache.shopeeShopFullKey(externalId);
+    const cached = await this.redisService.get<ShopFull>(cacheKey);
+    if (cached) return cached;
+
+    const storedShop = await this.shopRepository.getShopByExternalIdAndUserId(externalId, userId);
+
+    if (!storedShop) throw new NotFoundException('Shop não encontrado');
+
+    const shop = {
+      id: storedShop.external_id,
+      name: storedShop.name,
+      description: storedShop.description,
+      shop_logo: storedShop.shop_logo,
+      marketplace: storedShop.marketplace,
+      authorization_expiration: storedShop.authorization_expiration,
+      authorized_in: storedShop.authorized_in,
+      status: storedShop.status,
+      invoice_issuer: storedShop.invoice_issuer,
+      region: storedShop.region,
+    };
+
+    await this.redisService.set(
+      cache.shopeeShopFullKey(shop.id!),
+      shop,
+      cache.shopeeShopFullTTL, // 1 hora em segundos
+    );
+
+    return shop;
+  }
+
   async getShopByExternalIdAndUserId(externalId: string, userId: string) {
     return await this.shopRepository.getShopByExternalIdAndUserId(externalId, userId);
   }
@@ -93,6 +125,10 @@ export class ShopsService {
       shop_logo: string;
       description: string;
       authorization_expiration: Date;
+      authorized_in: Date;
+      status: ShopStatus;
+      invoice_issuer: string;
+      region: string;
     },
   ) {
     return await this.shopRepository.updateShop(shopId, data);

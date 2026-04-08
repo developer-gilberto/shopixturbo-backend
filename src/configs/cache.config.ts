@@ -6,6 +6,9 @@ export const cache = {
 
   shopeeAccessTokenTTL: constants.ONE_HOUR_IN_SECONDS * 3, // 3 horas em segundos
   shopeeAccessTokenKey: (shopId: string) => `shopee:access_token:${shopId}`,
+
+  shopeeShopFullTTL: constants.ONE_HOUR_IN_SECONDS,
+  shopeeShopFullKey: (shopId: string) => `shopee:full_shop:${shopId}`,
 };
 
 export type Cache = typeof cache;

@@ -1,7 +1,9 @@
 import { Controller, Get, HttpStatus, Param, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { GetShopDTO, GetShopInfoResponseDTO, GetShopProfileResponseDTO } from './shops.dto';
+import type { TokenPayload } from 'src/common/types/token-payload.type';
+import { GetShopDTO, GetShopInfoResponseDTO, GetShopProfileResponseDTO, ShopFullResponseDTO } from './shops.dto';
 import { ShopsService } from './shops.service';
 
 @Controller('shops')
@@ -33,5 +35,11 @@ export class ShopsController {
       shop_logo: shopData.shop_logo,
       invoice_issuer: shopData.invoice_issuer,
     };
+  }
+
+  @Get('full/:shop_id')
+  @ApiResponse({ status: HttpStatus.OK, type: ShopFullResponseDTO })
+  async getShopFullById(@CurrentUser() user: TokenPayload, @Param() data: GetShopDTO) {
+    return await this.shopService.getShopFullByExternalIdAndUserId(data.shop_id, user.id);
   }
 }

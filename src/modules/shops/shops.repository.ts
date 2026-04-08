@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
+import { ShopStatus } from 'src/generated/prisma/enums';
 import { ShopCreate } from './shops.type';
 
 @Injectable()
@@ -76,6 +77,10 @@ export class ShopsRepository {
       shop_logo: string;
       description: string;
       authorization_expiration: Date;
+      authorized_in: Date;
+      status: ShopStatus;
+      invoice_issuer: string;
+      region: string;
     },
   ) {
     try {
