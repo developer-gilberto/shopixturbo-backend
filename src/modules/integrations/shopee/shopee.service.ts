@@ -1,9 +1,12 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { EncryptionService } from 'src/common/encryption/encryption.service';
 import { cache } from 'src/configs/cache.config';
+import { Env } from 'src/configs/env.schema';
 import { RedisService } from 'src/database/redis.service';
 import { MarketplaceType } from 'src/generated/prisma/enums';
 import { ShopsService } from 'src/modules/shops/shops.service';
+import { ShopInfo, ShopProfile } from 'src/modules/shops/shops.type';
 import { ShopeeAuthService } from './auth/shopee-auth.service';
 import { CallbackGetTokenDTO } from './shopee.dto';
 
@@ -11,12 +14,19 @@ import { CallbackGetTokenDTO } from './shopee.dto';
 export class ShopeeService {
   private readonly logger = new Logger(ShopeeService.name);
 
+  private readonly getShopInfoPath: string;
+  private readonly getShopProfilePath: string;
+
   constructor(
+    private readonly configService: ConfigService<Env>,
     private readonly shopeeAuthService: ShopeeAuthService,
     private readonly shopService: ShopsService,
     private readonly encryptionService: EncryptionService,
     private readonly redisService: RedisService,
-  ) {}
+  ) {
+    this.getShopInfoPath = this.configService.getOrThrow<string>('GET_SHOP_INFO_PATH');
+    this.getShopProfilePath = this.configService.getOrThrow<string>('GET_SHOP_PROFILE_PATH');
+  }
 
   getAuthUrl(): string {
     return this.shopeeAuthService.generateAuthorizationUrl();
@@ -27,8 +37,8 @@ export class ShopeeService {
     const permanentTokens = await this.shopeeAuthService.getAccessToken(data.shop_id, temporaryTokens.refresh_token);
 
     const [fetchShopInfo, fetchShopProfile] = await Promise.allSettled([
-      this.shopService.getShopInfo(data.shop_id, permanentTokens.access_token),
-      this.shopService.getShopProfile(data.shop_id, permanentTokens.access_token),
+      this.fetchShop<ShopInfo>(data.shop_id, permanentTokens.access_token, this.getShopInfoPath),
+      this.fetchShop<ShopProfile>(data.shop_id, permanentTokens.access_token, this.getShopProfilePath),
     ]);
 
     if (fetchShopInfo.status === 'rejected') {
@@ -80,13 +90,13 @@ export class ShopeeService {
     });
 
     await this.redisService.set(
-      cache.shopeeAccessTokenKey(shop.id),
+      cache.shopeeAccessTokenKey(shop.external_id!),
       permanentTokens.access_token,
       cache.shopeeAccessTokenTTL, // 3 horas em segundos
     );
 
     const shopData = {
-      id: shop.id,
+      id: shop.external_id,
       name: shopInfo.shop_name,
       description: shopProfile.description,
       shop_logo: shopProfile.shop_logo,
@@ -100,5 +110,26 @@ export class ShopeeService {
       message: 'Loja conectada com sucesso',
       shop: shopData,
     };
+  }
+
+  async fetchShop<T>(shop_id: string, accessToken: string, path: string): Promise<T> {
+    const url = this.shopeeAuthService.generateSignedUrl({
+      path,
+      accessToken,
+      shopId: Number(shop_id),
+    });
+    const encodeUrl = encodeURI(url);
+
+    const response = await fetch(encodeUrl);
+
+    if (!response.ok) {
+      this.logger.error('API Shopee: falha ao buscar dados do shop: \n', response);
+      throw new HttpException(`API Shopee: ${response.statusText}`, response.status, {
+        cause: new Error(response.statusText),
+      });
+    }
+
+    const data = await response.json();
+    return path === this.getShopInfoPath ? data : data.response;
   }
 }

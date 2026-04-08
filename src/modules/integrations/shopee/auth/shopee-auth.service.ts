@@ -1,6 +1,7 @@
 import * as crypto from 'node:crypto';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Env } from 'src/configs/env.schema';
 import { ShopeeAccessTokenResponse, SignedUrlData } from './shopee.auth.type';
 
 @Injectable()
@@ -15,7 +16,7 @@ export class ShopeeAuthService {
   private readonly getAccessTokenPath: string;
   private readonly getRefreshTokenPath: string;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService<Env>) {
     this.partnerId = this.configService.getOrThrow<number>('SHOPEE_PARTNER_ID');
     this.partnerKey = this.configService.getOrThrow<string>('SHOPEE_PARTNER_KEY');
     this.host = this.configService.getOrThrow<string>('SHOPEE_AUTH_PARTNER_HOST');
