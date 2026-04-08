@@ -1,9 +1,8 @@
-import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { env } from './configs/env.config';
+import { envSchema } from './configs/env.schema';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ShopeeModule } from './modules/integrations/shopee/shopee.module';
@@ -15,17 +14,12 @@ import { UsersModule } from './modules/users/users.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-    }),
-    BullModule.forRoot({
-      connection: {
-        host: env.REDIS_HOST,
-        port: env.REDIS_PORT,
-      },
+      validate: (env) => envSchema.parse(env),
     }),
     DatabaseModule,
     AuthModule,
-    UsersModule,
     MailModule,
+    UsersModule,
     ShopeeModule,
     ShopsModule,
   ],
