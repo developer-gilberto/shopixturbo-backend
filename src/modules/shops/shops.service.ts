@@ -1,5 +1,8 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { cache } from 'src/configs/cache.config';
+import { Env } from 'src/configs/env.schema';
+import { RedisService } from 'src/database/redis.service';
 import { ShopeeAuthService } from '../integrations/shopee/auth/shopee-auth.service';
 import { ShopsRepository } from './shops.repository';
 import { ShopCreate, ShopInfo, ShopProfile } from './shops.type';
@@ -12,15 +15,22 @@ export class ShopsService {
   private readonly getShopProfilePath: string;
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly shopeeAuthService: ShopeeAuthService,
     private readonly shopRepository: ShopsRepository,
+    private readonly redisService: RedisService,
+    private readonly configService: ConfigService<Env>,
   ) {
     this.getShopInfoPath = this.configService.getOrThrow<string>('GET_SHOP_INFO_PATH');
     this.getShopProfilePath = this.configService.getOrThrow<string>('GET_SHOP_PROFILE_PATH');
   }
 
-  async getShopInfo(shop_id: string, accessToken: string): Promise<ShopInfo> {
+  async getShopInfo(shop_id: string): Promise<ShopInfo> {
+    const accessToken = await this.redisService.get<string>(cache.shopeeAccessTokenKey(shop_id));
+
+    if (!accessToken) {
+      throw new UnauthorizedException('Token de acesso expirado ou não encontrado.');
+    }
+
     const url = this.shopeeAuthService.generateSignedUrl({
       path: this.getShopInfoPath,
       accessToken,
@@ -41,7 +51,13 @@ export class ShopsService {
     return data;
   }
 
-  async getShopProfile(shop_id: string, accessToken: string): Promise<ShopProfile> {
+  async getShopProfile(shop_id: string): Promise<ShopProfile> {
+    const accessToken = await this.redisService.get<string>(cache.shopeeAccessTokenKey(shop_id));
+
+    if (!accessToken) {
+      throw new UnauthorizedException('Token de acesso expirado ou não encontrado.');
+    }
+
     const url = this.shopeeAuthService.generateSignedUrl({
       path: this.getShopProfilePath,
       accessToken,
