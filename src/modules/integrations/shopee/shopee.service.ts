@@ -67,6 +67,10 @@ export class ShopeeService {
         shop_logo: shopProfile.shop_logo,
         marketplace: MarketplaceType.SHOPEE,
         authorization_expiration: new Date(shopInfo.expire_time * 1000),
+        authorized_in: new Date(shopInfo.auth_time * 1000),
+        status: shopInfo.status,
+        invoice_issuer: shopProfile.invoice_issuer,
+        region: shopInfo.region,
         external_id: data.shop_id,
         user_id: userId,
       });
@@ -76,6 +80,10 @@ export class ShopeeService {
         description: shopProfile.description,
         shop_logo: shopProfile.shop_logo,
         authorization_expiration: new Date(shopInfo.expire_time * 1000),
+        authorized_in: new Date(shopInfo.auth_time * 1000),
+        status: shopInfo.status,
+        invoice_issuer: shopProfile.invoice_issuer,
+        region: shopInfo.region,
       });
     }
 
@@ -100,11 +108,19 @@ export class ShopeeService {
       name: shopInfo.shop_name,
       description: shopProfile.description,
       shop_logo: shopProfile.shop_logo,
-      marketplace: shop.marketplace,
+      marketplace: MarketplaceType.SHOPEE,
       authorization_expiration: new Date(shopInfo.expire_time * 1000),
+      authorized_in: new Date(shopInfo.auth_time * 1000),
       status: shopInfo.status,
       invoice_issuer: shopProfile.invoice_issuer,
+      region: shopInfo.region,
     };
+
+    await this.redisService.set(
+      cache.shopeeShopFullKey(shop.external_id!),
+      shopData,
+      cache.shopeeShopFullTTL, // 1 hora em segundos
+    );
 
     return {
       message: 'Loja conectada com sucesso',

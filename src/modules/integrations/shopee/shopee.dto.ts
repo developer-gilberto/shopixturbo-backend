@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
-import { MarketplaceType } from 'src/generated/prisma/enums';
+import { MarketplaceType, ShopStatus } from 'src/generated/prisma/enums';
 
 export class CallbackGetTokenDTO {
   @ApiProperty({ description: 'O código da URL de redirecionamento' })
@@ -47,11 +47,21 @@ export class ShopResponseDTO {
   @ApiProperty({ type: 'string', format: 'date-time', example: '2027-04-08T03:36:06.000Z' })
   authorization_expiration: Date;
 
-  @ApiProperty({ example: 'NORMAL' })
+  @ApiProperty({ type: 'string', format: 'date-time', example: '2027-04-08T03:36:06.000Z' })
+  authorized_in: Date;
+
+  @ApiProperty({ enum: ShopStatus, example: ShopStatus.NORMAL })
   status: string;
 
-  @ApiProperty({ example: 'Other' })
+  @ApiProperty({
+    example: 'Other',
+    description:
+      'A informação do emissor da fatura para a loja. Pode ser "Shopee" ou "Other" como o emissor da fatura. Isto é apenas para o vendedor do BR CNPJ.',
+  })
   invoice_issuer: string;
+
+  @ApiProperty({ example: 'BR' })
+  region: string;
 }
 
 export class CallbackGetTokenResponseDTO {
