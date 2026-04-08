@@ -31,14 +31,24 @@ enum UserRole {
   ADMIN
 }
 
+enum ShopStatus {
+  NORMAL
+  BANNED
+  FROZEN
+}
+
 model Shop {
-  id                       String    @id @default(uuid())
+  id                       String          @id @default(uuid())
   name                     String
   description              String?
   shop_logo                String?
   marketplace              MarketplaceType
   external_id              String?
   authorization_expiration DateTime?
+  authorized_in            DateTime?
+  status                   ShopStatus
+  invoice_issuer           String?
+  region                   String?
   deleted_at               DateTime?
 
   created_at DateTime @default(now())
