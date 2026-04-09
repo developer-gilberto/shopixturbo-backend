@@ -1,3 +1,15 @@
+---
+name: shopixturbo-core-rules
+description: Define as regras, padrões e decisões arquiteturais. Cria módulos NestJS seguindo o padrão do shopixturbo (controller,
+service, repository, DTO, swagger). Use sempre que o usuário pedir
+para criar um módulo, endpoint, recurso, entidade, ou qualquer
+feature nova, mesmo que não mencione NestJS explicitamente.
+license: Copyright(c) 2026. Todos os direitos reservados. Este software é proprietário.
+compatibility: opencode
+author: Gilberto Lopes
+tags: [nestjs, backend, api]
+---
+
 ## 📌 Objetivo
 
 Este documento define as regras, padrões e decisões arquiteturais deste projeto (**ShopixTurbo**).
@@ -29,6 +41,7 @@ Cada domínio deve conter:
 - `*.repository.ts` → acesso ao banco de dados via Prisma
 - `*.module.ts` → organização do módulo
 - `*.dto.ts` → validação e tipagem de entrada
+- `*.type.ts` → tipagem para o módulo
 - `*.spec.ts` → testes unitários e de integração
 
 ### Regras importantes
@@ -124,7 +137,7 @@ Cada domínio deve conter:
 
 - Definir TTL sempre que possível
 - Evitar cache de dados sensíveis
-- Nomear chaves de forma padronizada:
+- Nomear chaves de forma padronizada e única:
   - `user:{id}`
   - `auth:{token}`
 
@@ -205,4 +218,4 @@ Seguir Conventional Commits:
 ## 🧠 Observação Final
 
 Este projeto segue padrões de nível profissional.
-Qualquer alteração estrutural deve atualizar este documento(AGENTS.md), SKILL.md e README.md.
+Qualquer alteração no código deve atualizar a documentação do projeto usando a SKILL .opencode/skills/docs-writer/SKILL.md
