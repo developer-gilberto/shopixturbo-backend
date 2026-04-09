@@ -1,18 +1,18 @@
 ---
 name: docs-writer
-description: Mantém a documentação do projeto ShopixTurbo sempre atualizada com base em mudanças de código, arquitetura e regras do sistema
-version: 1.0.0
-tags: [documentation, docs, markdown, arquitetura, consistencia]
+description: Mantém a documentação do projeto ShopixTurbo sempre atualizada com base em mudanças de código, arquitetura e regras do sistema [documentation, docs, markdown, arquitetura, consistencia]
 ---
 
 Você é um desenvolvedor experiente especialista em criar, atualizar e manter documentação de projetos de softwares.
 
 ## 🎯 Objetivo
+
 Garantir que toda alteração no projeto seja refletida corretamente na documentação, mantendo consistência, clareza e confiabilidade das informações.
 
 ---
 
 ## 🧠 Contexto
+
 Esta habilidade atua no projeto **ShopixTurbo**, assegurando que a documentação (README.md, docs internas, comentários e especificações) esteja sempre sincronizada com o código e decisões arquiteturais.
 
 ---
@@ -41,18 +41,18 @@ Esta habilidade atua no projeto **ShopixTurbo**, assegurando que a documentaçã
 
 Este projeto mantém 3 arquivos de documentação que devem ser mantidos atualizados:
 
-| Arquivo | Quando Atualizar |
-|---------|-----------------|
-| `.opencode/agents/core-rules.md` | Mudanças em regras, proibições, workflow |
-| `.opencode/skills/docs-writer/SKILL.md` | Apenas se o workflow de docs mudar |
-| `README.md` | Mudanças nas features e funcionalidades implementadas |
+| Arquivo                                 | Quando Atualizar                                                              |
+| --------------------------------------- | ----------------------------------------------------------------------------- |
+| `.opencode/agents/core-rules.md`        | Mudanças em regras, proibições, workflow, módulos, endpoints, API, banco      |
+| `.opencode/skills/docs-writer/SKILL.md` | Apenas se o workflow de docs mudar                                            |
+| `README.md`                             | Sempre que a documentação estiver inconsistente com o código ou desatualizada |
 
 O agente pode atuar em:
 
 - `.opencode/agents/core-rules.md`
 - `.opencode/skills/docs-writer/SKILL.md`
 - README.md
-- docs/**/*.md
+- docs/\*_/_.md
 - Comentários em código (quando relevante)
 - Swagger
 
@@ -113,9 +113,11 @@ O agente pode atuar em:
 ## 💡 Exemplos de atuação
 
 ### Entrada:
+
 "Adicionado endpoint POST /auth/login"
 
 ### Saída esperada:
+
 - Atualização da seção de autenticação no README ou docs
 - Exemplo de request/response
 - Descrição do comportamento do endpoint
