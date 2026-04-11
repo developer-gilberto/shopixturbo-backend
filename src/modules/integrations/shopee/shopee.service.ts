@@ -6,9 +6,10 @@ import { Env } from 'src/configs/env.schema';
 import { RedisService } from 'src/database/redis.service';
 import { MarketplaceType } from 'src/generated/prisma/enums';
 import { ShopsService } from 'src/modules/shops/shops.service';
-import { ShopInfo, ShopProfile } from 'src/modules/shops/shops.type';
+import { ShopFull, ShopInfo, ShopProfile } from 'src/modules/shops/shops.type';
 import { ShopeeAuthService } from './auth/shopee-auth.service';
 import { CallbackGetTokenDTO } from './shopee.dto';
+import { ShopeeTokenCached } from './token/shopee-token.type';
 
 @Injectable()
 export class ShopeeService {
@@ -58,7 +59,7 @@ export class ShopeeService {
     const shopInfo = fetchShopInfo.value;
     const shopProfile = fetchShopProfile.value;
 
-    let shop = await this.shopService.getShopByExternalIdAndUserId(data.shop_id, userId);
+    let shop = await this.shopService.getShopByIdAndUserId(data.shop_id, userId);
 
     if (!shop) {
       shop = await this.shopService.createShop({
@@ -87,25 +88,28 @@ export class ShopeeService {
       });
     }
 
-    const encryptedAccessToken = this.encryptionService.encrypt(permanentTokens.access_token);
-    const encryptedRefreshToken = this.encryptionService.encrypt(permanentTokens.refresh_token);
-    const expiresAt = new Date(Date.now() + permanentTokens.expire_in * 1000);
-
     await this.shopService.updateOrInsertMarketplaceToken(shop.id, {
-      access_token: encryptedAccessToken,
-      refresh_token: encryptedRefreshToken,
-      expires_at: expiresAt, // data e hora exatas da expiração do access_token(válido por 4 horas)
+      access_token: this.encryptionService.encrypt(permanentTokens.access_token),
+      refresh_token: this.encryptionService.encrypt(permanentTokens.refresh_token),
+      external_shop_id: shop.external_id!,
+      expires_at: new Date(Date.now() + permanentTokens.expire_in * 1000), // data e hora da expiração(válido por 4 horas)
     });
 
+    const tokenData: ShopeeTokenCached = {
+      internal_shop_id: shop.id,
+      external_shop_id: shop.external_id!,
+      access_token: permanentTokens.access_token,
+    };
+
     await this.redisService.set(
-      cache.shopeeAccessTokenKey(shop.external_id!),
-      permanentTokens.access_token,
+      cache.shopeeAccessTokenKey(userId, shop.id),
+      tokenData,
       cache.shopeeAccessTokenTTL, // 3 horas em segundos
     );
 
-    const shopData = {
-      id: shop.external_id,
-      name: shopInfo.shop_name,
+    const shopData: ShopFull = {
+      id: shop.id,
+      shop_name: shopInfo.shop_name,
       description: shopProfile.description,
       shop_logo: shopProfile.shop_logo,
       marketplace: MarketplaceType.SHOPEE,
@@ -117,7 +121,7 @@ export class ShopeeService {
     };
 
     await this.redisService.set(
-      cache.shopeeShopFullKey(shop.external_id!),
+      cache.shopeeShopFullKey(userId, shop.id),
       shopData,
       cache.shopeeShopFullTTL, // 1 hora em segundos
     );

@@ -33,7 +33,7 @@ export class ShopResponseDTO {
   id: number;
 
   @ApiProperty({ example: 'nome da loja' })
-  name: string;
+  shop_name: string;
 
   @ApiProperty({ example: 'descrição da loja' })
   description: string;
