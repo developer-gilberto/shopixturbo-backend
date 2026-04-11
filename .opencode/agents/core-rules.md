@@ -49,6 +49,7 @@ Cada domínio deve conter:
 - Controllers NÃO devem conter lógica de negócio
 - Services NÃO devem acessar diretamente request/response
 - Repository é a única camada que deve interagir com o banco de dados
+- Um módulo nunca deve interagir diretamente com o repository de outro módulo, use o service do outro módulo para interagir com o repository dele
 - Regras devem ser reutilizáveis
 - Sempre analisar o código gerado em busca de vulnerabilidades e informar caso for encontrada
 - Nunca acessar `process.env` diretamente fora de configs/
@@ -140,6 +141,30 @@ Cada domínio deve conter:
 - Nomear chaves de forma padronizada e única:
   - `user:{id}`
   - `auth:{token}`
+  - `shopee:access_token:{shop_id}`
+
+---
+
+## 🛒 Integração Shopee
+
+### ShopeeTokenManagerService
+
+Serviço para gerenciar access tokens da API da Shopee de forma automática:
+
+- **Fluxo de obtenção de token válido**:
+  1. Busca no cache (Redis) primeiro
+  2. Se não encontrar no cache, busca no banco de dados
+  3. Se o token do DB estiver expirado, renova automaticamente usando o refresh_token
+  4. Armazena o token válido no cache e retorna
+
+- **Método `isTokenExpired(expiresAt: Date | null)`**: Verifica se o token está expirado comparando `expiresAt` com `now` (sem margem)
+
+- **TTL do cache**: igual ao `expire_in` do token
+
+### Tokens
+
+Tokens são armazenados criptografados no banco de dados usando o `EncryptionService`.
+O campo `expires_at` é usado para verificar a validade do token.
 
 ---
 
