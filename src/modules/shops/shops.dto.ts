@@ -58,7 +58,7 @@ export class ShopFullResponseDTO {
   id: string;
 
   @ApiProperty({ example: 'nome da loja' })
-  name: string;
+  shop_name: string;
 
   @ApiProperty({ example: 'https://cf.shopee.com.br/file/br-11134207-81z1k-mmdp0d9cwu0w1f' })
   shop_logo: string;

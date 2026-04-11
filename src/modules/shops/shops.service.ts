@@ -1,10 +1,11 @@
-import { HttpException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { cache } from 'src/configs/cache.config';
 import { Env } from 'src/configs/env.schema';
 import { RedisService } from 'src/database/redis.service';
 import { ShopStatus } from 'src/generated/prisma/enums';
 import { ShopeeAuthService } from '../integrations/shopee/auth/shopee-auth.service';
+import { ShopeeTokenService } from '../integrations/shopee/token/shopee-token.service';
 import { ShopsRepository } from './shops.repository';
 import { ShopCreate, ShopFull, ShopInfo, ShopProfile } from './shops.type';
 
@@ -16,26 +17,23 @@ export class ShopsService {
   private readonly getShopProfilePath: string;
 
   constructor(
+    private readonly configService: ConfigService<Env>,
+    private readonly shopeeTokenService: ShopeeTokenService,
     private readonly shopeeAuthService: ShopeeAuthService,
     private readonly shopRepository: ShopsRepository,
     private readonly redisService: RedisService,
-    private readonly configService: ConfigService<Env>,
   ) {
     this.getShopInfoPath = this.configService.getOrThrow<string>('GET_SHOP_INFO_PATH');
     this.getShopProfilePath = this.configService.getOrThrow<string>('GET_SHOP_PROFILE_PATH');
   }
 
-  async getShopInfo(shop_id: string): Promise<ShopInfo> {
-    const accessToken = await this.redisService.get<string>(cache.shopeeAccessTokenKey(shop_id));
-
-    if (!accessToken) {
-      throw new UnauthorizedException('Token de acesso expirado ou não encontrado.');
-    }
+  async getShopInfo(userId: string, shopId: string): Promise<ShopInfo> {
+    const cachedTokenAndShopId = await this.shopeeTokenService.getValidAccessToken(userId, shopId);
 
     const url = this.shopeeAuthService.generateSignedUrl({
       path: this.getShopInfoPath,
-      accessToken,
-      shopId: Number(shop_id),
+      accessToken: cachedTokenAndShopId.access_token,
+      shopId: Number(cachedTokenAndShopId.external_shop_id),
     });
     const encodeUrl = encodeURI(url);
 
@@ -49,20 +47,22 @@ export class ShopsService {
     }
 
     const data = await response.json();
-    return data;
+    return {
+      shop_name: data.shop_name,
+      region: data.region,
+      status: data.status,
+      auth_time: data.auth_time,
+      expire_time: data.expire_time,
+    };
   }
 
-  async getShopProfile(shop_id: string): Promise<ShopProfile> {
-    const accessToken = await this.redisService.get<string>(cache.shopeeAccessTokenKey(shop_id));
-
-    if (!accessToken) {
-      throw new UnauthorizedException('Token de acesso expirado ou não encontrado.');
-    }
+  async getShopProfile(userId: string, shopId: string): Promise<ShopProfile> {
+    const cachedTokenAndShopId = await this.shopeeTokenService.getValidAccessToken(userId, shopId);
 
     const url = this.shopeeAuthService.generateSignedUrl({
       path: this.getShopProfilePath,
-      accessToken,
-      shopId: Number(shop_id),
+      accessToken: cachedTokenAndShopId.access_token,
+      shopId: Number(cachedTokenAndShopId.external_shop_id),
     });
     const encodeUrl = encodeURI(url);
 
@@ -76,33 +76,38 @@ export class ShopsService {
     }
 
     const data = await response.json();
-    return data.response;
+    return {
+      shop_name: data.response.shop_name,
+      description: data.response.description,
+      shop_logo: data.response.shop_logo,
+      invoice_issuer: data.response.invoice_issuer,
+    };
   }
 
-  async getShopFullByExternalIdAndUserId(externalId: string, userId: string) {
-    const cacheKey = cache.shopeeShopFullKey(externalId);
-    const cached = await this.redisService.get<ShopFull>(cacheKey);
-    if (cached) return cached;
+  async getShopFullByIdAndUserId(userId: string, shopId: string) {
+    const cacheKey = cache.shopeeShopFullKey(userId, shopId);
+    const cachedShop = await this.redisService.get<ShopFull>(cacheKey);
+    if (cachedShop) return cachedShop;
 
-    const storedShop = await this.shopRepository.getShopByExternalIdAndUserId(externalId, userId);
+    const storedShop = await this.shopRepository.getShopByIdAndUserId(shopId, userId);
 
     if (!storedShop) throw new NotFoundException('Shop não encontrado');
 
-    const shop = {
-      id: storedShop.external_id,
-      name: storedShop.name,
-      description: storedShop.description,
-      shop_logo: storedShop.shop_logo,
+    const shop: ShopFull = {
+      id: storedShop.id,
+      shop_name: storedShop.name,
+      description: storedShop.description!,
+      shop_logo: storedShop.shop_logo!,
       marketplace: storedShop.marketplace,
-      authorization_expiration: storedShop.authorization_expiration,
-      authorized_in: storedShop.authorized_in,
+      authorization_expiration: storedShop.authorization_expiration!,
+      authorized_in: storedShop.authorized_in!,
       status: storedShop.status,
-      invoice_issuer: storedShop.invoice_issuer,
-      region: storedShop.region,
+      invoice_issuer: storedShop.invoice_issuer!,
+      region: storedShop.region!,
     };
 
     await this.redisService.set(
-      cache.shopeeShopFullKey(shop.id!),
+      cache.shopeeShopFullKey(userId, shop.id),
       shop,
       cache.shopeeShopFullTTL, // 1 hora em segundos
     );
@@ -110,8 +115,8 @@ export class ShopsService {
     return shop;
   }
 
-  async getShopByExternalIdAndUserId(externalId: string, userId: string) {
-    return await this.shopRepository.getShopByExternalIdAndUserId(externalId, userId);
+  async getShopByIdAndUserId(shopId: string, userId: string) {
+    return await this.shopRepository.getShopByIdAndUserId(shopId, userId);
   }
 
   async createShop(data: ShopCreate) {
@@ -139,9 +144,14 @@ export class ShopsService {
     data: {
       access_token: string;
       refresh_token: string;
+      external_shop_id: string;
       expires_at: Date;
     },
   ) {
     return await this.shopRepository.updateOrInsertMarketplaceToken(shopId, data);
+  }
+
+  async getShopByIdWithTokenInclude(shopId: string) {
+    return await this.shopRepository.getShopByIdWithTokenInclude(shopId);
   }
 }

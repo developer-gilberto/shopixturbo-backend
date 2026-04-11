@@ -18,13 +18,13 @@ export class ShopsRepository {
     }
   }
 
-  async getShopByExternalIdAndUserId(externalId: string, userId: string) {
+  async getShopByIdAndUserId(shopId: string, userId: string) {
     try {
       return await this.prismaClient.shop.findFirst({
-        where: { external_id: externalId, user_id: userId },
+        where: { id: shopId, user_id: userId },
       });
     } catch (err) {
-      this.logger.error(`Prisma: falha ao buscar shop com external_id "${externalId}" e user_id "${userId}" \n`, err);
+      this.logger.error(`Prisma: falha ao buscar shop com external_id "${shopId}" e user_id "${userId}" \n`, err);
       throw new InternalServerErrorException('Falha ao buscar o shop.');
     }
   }
@@ -46,6 +46,7 @@ export class ShopsRepository {
     data: {
       access_token: string;
       refresh_token: string;
+      external_shop_id: string;
       expires_at: Date;
     },
   ) {
@@ -61,6 +62,7 @@ export class ShopsRepository {
           shop_id: shopId,
           access_token: data.access_token,
           refresh_token: data.refresh_token,
+          external_shop_id: data.external_shop_id,
           expires_at: data.expires_at,
         },
       });

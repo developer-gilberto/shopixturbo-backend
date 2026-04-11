@@ -14,32 +14,19 @@ export class ShopsController {
 
   @Get('info/:shop_id')
   @ApiResponse({ status: HttpStatus.OK, type: GetShopInfoResponseDTO })
-  async getShopInfoById(@Param() data: GetShopDTO) {
-    const shopData = await this.shopService.getShopInfo(data.shop_id);
-    return {
-      shop_name: shopData.shop_name,
-      region: shopData.region,
-      status: shopData.status,
-      auth_time: shopData.auth_time,
-      expire_time: shopData.expire_time,
-    };
+  async getShopInfoById(@CurrentUser() user: TokenPayload, @Param() data: GetShopDTO) {
+    return await this.shopService.getShopInfo(user.id, data.shop_id);
   }
 
   @Get('profile/:shop_id')
   @ApiResponse({ status: HttpStatus.OK, type: GetShopProfileResponseDTO })
-  async getShopProfileById(@Param() data: GetShopDTO) {
-    const shopData = await this.shopService.getShopProfile(data.shop_id);
-    return {
-      shop_name: shopData.shop_name,
-      description: shopData.description,
-      shop_logo: shopData.shop_logo,
-      invoice_issuer: shopData.invoice_issuer,
-    };
+  async getShopProfileById(@CurrentUser() user: TokenPayload, @Param() data: GetShopDTO) {
+    return await this.shopService.getShopProfile(user.id, data.shop_id);
   }
 
   @Get('full/:shop_id')
   @ApiResponse({ status: HttpStatus.OK, type: ShopFullResponseDTO })
   async getShopFullById(@CurrentUser() user: TokenPayload, @Param() data: GetShopDTO) {
-    return await this.shopService.getShopFullByExternalIdAndUserId(data.shop_id, user.id);
+    return await this.shopService.getShopFullByIdAndUserId(user.id, data.shop_id);
   }
 }
