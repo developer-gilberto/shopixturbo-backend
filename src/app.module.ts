@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ShopeeModule } from './modules/integrations/shopee/shopee.module';
 import { MailModule } from './modules/mail/mail.module';
+import { ProductsModule } from './modules/products/products.module';
 import { ShopsModule } from './modules/shops/shops.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -21,6 +22,7 @@ import { UsersModule } from './modules/users/users.module';
     UsersModule,
     ShopeeModule,
     ShopsModule,
+    ProductsModule,
     AuthModule,
   ],
   controllers: [AppController],
