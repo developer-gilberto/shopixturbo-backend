@@ -1,5 +1,6 @@
-import { Transform, Type } from 'class-transformer';
-import { IsArray, IsEnum, IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsEnum, IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
 import { ItemStatus } from './products.enum';
 
 export class GetProductListQueryDTO {
@@ -26,37 +27,53 @@ export class GetProductListQueryDTO {
   @IsNumber()
   update_time_to?: number;
 
-  @IsEnum(ItemStatus, { each: true })
-  @IsArray()
-  @Transform(({ value }) => {
-    if (Array.isArray(value)) return value;
-    if (typeof value === 'string') return [value];
-    return undefined;
-  })
-  item_status: ItemStatus[];
+  @IsOptional()
+  @IsEnum(ItemStatus)
+  item_status: ItemStatus;
 }
 
-// GetProductListDTO
-// "response": {
-//         "item": [
-//             {
-//                 "item_id": 892610904,
-//                 "item_status": "NORMAL",
-//                 "update_time": 1774731028,
-//                 "tag": {
-//                     "kit": false
-//                 }
-//             },
-//             {
-//                 "item_id": 892610903,
-//                 "item_status": "NORMAL",
-//                 "update_time": 1774730884,
-//                 "tag": {
-//                     "kit": false
-//                 }
-//             }
-//         ],
-//         "total_count": 10,
-//         "has_next_page": false,
-//         "next": ""
-//     }
+export class ProductTagDTO {
+  @ApiProperty({ example: false })
+  kit: boolean;
+}
+
+export class ProductItemDTO {
+  @ApiProperty({ example: 885177996 })
+  item_id: number;
+
+  @ApiProperty({
+    enum: ItemStatus,
+    example: ItemStatus.NORMAL,
+  })
+  item_status: ItemStatus;
+
+  @ApiProperty({
+    example: 1776198667,
+    description: 'Unix timestamp em segundos',
+  })
+  update_time: number;
+
+  @ApiProperty({ type: () => ProductTagDTO })
+  tag: ProductTagDTO;
+}
+
+export class GetProductListResponseDTO {
+  @ApiProperty({
+    type: () => [ProductItemDTO],
+  })
+  item: ProductItemDTO[];
+
+  @ApiProperty({ example: 11 })
+  total_count: number;
+
+  @ApiProperty({ example: false })
+  has_next_page: boolean;
+
+  @ApiProperty({ example: 50 })
+  next_offset: number;
+
+  @ApiProperty({
+    example: '',
+  })
+  next: string;
+}

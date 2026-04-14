@@ -28,9 +28,8 @@ export class ProductsService {
       shopId: Number(cachedTokenAndShopId.external_shop_id),
     });
 
-    // falta acrescentar "update_time_from" e "update_time_to" na url e tratar item_status q pode ser -> item_status=NORMAL&item_status=BANNED
     const encodeUrl = encodeURI(
-      `${signedUrl}&offset=${data.offset}&page_size=${data.page_size}&item_status=${data.item_status[0]}`,
+      `${signedUrl}&offset=${data.offset}&page_size=${data.page_size}&item_status=${data.item_status}&update_time_from=${data.update_time_from}&update_time_to=${data.update_time_to}`,
     );
 
     const response = await fetch(encodeUrl);
@@ -44,6 +43,6 @@ export class ProductsService {
 
     const productsList = await response.json();
 
-    return productsList;
+    return productsList.response;
   }
 }

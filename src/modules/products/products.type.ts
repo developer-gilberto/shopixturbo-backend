@@ -7,5 +7,5 @@ export interface GetProductList {
   page_size: number;
   update_time_from: number;
   update_time_to: number;
-  item_status: ItemStatus[];
+  item_status: ItemStatus;
 }
