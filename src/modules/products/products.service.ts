@@ -3,13 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/configs/env.schema';
 import { ShopeeAuthService } from '../integrations/shopee/auth/shopee-auth.service';
 import { ShopeeTokenService } from '../integrations/shopee/token/shopee-token.service';
-import { GetProductList } from './products.type';
+import { GetProductList, GetProductsInfo } from './products.type';
 
 @Injectable()
 export class ProductsService {
   private readonly logger = new Logger(ProductsService.name);
 
   private readonly getProductListPath: string;
+  private readonly getProductInfoPath: string;
 
   constructor(
     private readonly configService: ConfigService<Env>,
@@ -17,6 +18,7 @@ export class ProductsService {
     private readonly shopeeAuthService: ShopeeAuthService,
   ) {
     this.getProductListPath = this.configService.getOrThrow<string>('GET_ITEM_LIST_PATH');
+    this.getProductInfoPath = this.configService.getOrThrow<string>('GET_ITEM_BASE_INFO_PATH');
   }
 
   async getProductsList(data: GetProductList) {
@@ -44,5 +46,32 @@ export class ProductsService {
     const productsList = await response.json();
 
     return productsList.response;
+  }
+
+  async getProductsInfo(data: GetProductsInfo) {
+    const cachedTokenAndShopId = await this.shopeeTokenService.getValidAccessToken(data.userId, data.shopId);
+
+    const signedUrl = this.shopeeAuthService.generateSignedUrl({
+      path: this.getProductInfoPath,
+      accessToken: cachedTokenAndShopId.access_token,
+      shopId: Number(cachedTokenAndShopId.external_shop_id),
+    });
+
+    const encodeUrl = encodeURI(
+      `${signedUrl}&item_id_list=${data.itemIdList}&need_tax_info=true&need_complaint_policy=true`,
+    );
+
+    const response = await fetch(encodeUrl);
+
+    if (!response.ok) {
+      this.logger.error('API Shopee: falha ao buscar lista de produtos: \n', response);
+      throw new HttpException(`API Shopee: ${response.statusText}`, response.status, {
+        cause: new Error(response.statusText),
+      });
+    }
+
+    const productsInfo = await response.json();
+
+    return productsInfo.response;
   }
 }

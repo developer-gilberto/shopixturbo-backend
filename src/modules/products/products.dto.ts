@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { ArrayMaxSize, ArrayNotEmpty, IsArray, IsEnum, IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
 import { ItemStatus } from './products.enum';
 
 export class GetProductListQueryDTO {
@@ -76,4 +76,22 @@ export class GetProductListResponseDTO {
     example: '',
   })
   next: string;
+}
+
+export class GetProductInfoDTO {
+  @Transform(({ value }) => {
+    if (typeof value !== 'string') return [];
+
+    return value
+      .split(',')
+      .map((v: string) => v.trim())
+      .filter((v: string) => v !== '')
+      .map((v: string) => Number(v));
+  })
+  @IsArray({ message: 'item_id_list deve ser um array de números inteiros.' })
+  @ArrayNotEmpty({ message: 'item_id_list não deve ser vazio.' })
+  @ArrayMaxSize(50, { message: 'item_id_list deve ter no máximo 50 item_id.' })
+  @IsInt({ each: true, message: 'Todos os item_id devem ser números inteiros.' })
+  @Min(1, { each: true, message: 'Todos os item_id devem ser maiores que 0.' })
+  item_id_list: number[];
 }

@@ -5,8 +5,9 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { DateRangeValidationPipe } from 'src/common/pipes/date-range-validation.pipe';
 import type { TokenPayload } from 'src/common/types/token-payload.type';
 import { GetShopDTO } from '../shops/shops.dto';
-import { GetProductListQueryDTO, GetProductListResponseDTO } from './products.dto';
+import { GetProductInfoDTO, GetProductListQueryDTO, GetProductListResponseDTO } from './products.dto';
 import { ProductsService } from './products.service';
+import { GetProductInfoResponseDTO } from './products-info.dto';
 
 @Controller('products')
 @UseGuards(JwtAuthGuard)
@@ -29,6 +30,20 @@ export class ProductsController {
       update_time_from: Number(query.update_time_from),
       update_time_to: Number(query.update_time_to),
       item_status: query.item_status,
+    });
+  }
+
+  @Get('info/:shop_id')
+  @ApiResponse({ status: HttpStatus.OK, type: GetProductInfoResponseDTO })
+  async getProducsInfo(
+    @CurrentUser() user: TokenPayload,
+    @Param() param: GetShopDTO,
+    @Query() query: GetProductInfoDTO,
+  ) {
+    return await this.productService.getProductsInfo({
+      userId: user.id,
+      shopId: param.shop_id,
+      itemIdList: query.item_id_list,
     });
   }
 }

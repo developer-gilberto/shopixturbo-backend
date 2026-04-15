@@ -9,3 +9,9 @@ export interface GetProductList {
   update_time_to: number;
   item_status: ItemStatus;
 }
+
+export interface GetProductsInfo {
+  userId: string;
+  shopId: string;
+  itemIdList: number[];
+}
