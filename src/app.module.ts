@@ -1,8 +1,9 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { envSchema } from './configs/env.schema';
+import { Env, envSchema } from './configs/env.schema';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ShopeeModule } from './modules/integrations/shopee/shopee.module';
@@ -16,6 +17,15 @@ import { UsersModule } from './modules/users/users.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validate: (env) => envSchema.parse(env),
+    }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService<Env>) => ({
+        connection: {
+          url: configService.getOrThrow<string>('REDIS_URL'),
+          maxRetriesPerRequest: null,
+        },
+      }),
     }),
     DatabaseModule,
     MailModule,
