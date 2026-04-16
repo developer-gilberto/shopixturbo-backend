@@ -11,9 +11,9 @@ import { AuthService } from './auth.service';
 @Module({
   imports: [
     JwtModule.registerAsync({
+      global: true,
       inject: [ConfigService],
       useFactory: (configService: ConfigService<Env>) => ({
-        global: true,
         secret: configService.getOrThrow<string>('JWT_SECRET'),
         signOptions: {
           expiresIn: configService.getOrThrow<StringValue>('JWT_EXPIRES_IN'),

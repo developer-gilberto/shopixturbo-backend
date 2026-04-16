@@ -1,18 +1,13 @@
 import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { TokenPayload } from 'src/common/types/token-payload.type';
-import { Env } from 'src/configs/env.schema';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   private readonly logger = new Logger(JwtAuthGuard.name);
 
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService<Env>,
-  ) {}
+  constructor(private readonly jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
@@ -21,9 +16,7 @@ export class JwtAuthGuard implements CanActivate {
     if (!token) throw new UnauthorizedException('Não autorizado. Token ausente.');
 
     try {
-      const payload = this.jwtService.verify<TokenPayload>(token, {
-        secret: this.configService.getOrThrow<string>('JWT_SECRET'),
-      });
+      const payload = this.jwtService.verify<TokenPayload>(token);
 
       request.user = payload;
     } catch (err) {
