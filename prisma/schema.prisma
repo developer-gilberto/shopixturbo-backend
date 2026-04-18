@@ -46,18 +46,19 @@ model Shop {
   external_id              String?
   authorization_expiration DateTime?
   authorized_in            DateTime?
-  status                   ShopStatus
+  status                   ShopStatus      @default(NORMAL)
   invoice_issuer           String?
   region                   String?
   deleted_at               DateTime?
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at               DateTime        @default(now())
+  updated_at               DateTime        @updatedAt
 
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  marketplace_token MarketplaceToken?
+  marketplace_token     MarketplaceToken?
+  products              Product[]
+  products_sync_control ProductsSyncControl[]
 
   @@index([user_id, marketplace])
   @@index([user_id])
@@ -76,12 +77,70 @@ model MarketplaceToken {
   refresh_token    String?
   external_shop_id String
   expires_at       DateTime?
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
 
   shop_id String @unique
   shop    Shop   @relation(fields: [shop_id], references: [id], onDelete: Cascade)
 
   @@map("marketplace_tokens")
+}
+
+model Product {
+  id                  String          @id @default(uuid())
+  marketplace         MarketplaceType
+  category_id         Int
+  name                String
+  sku                 String?
+  image_url           String?
+  stock               Int
+  sale_price_cents    Int
+  cost_price_cents    Int?
+  government_taxes    Int?
+  external_id         String?
+  external_created_at DateTime?
+  external_updated_at DateTime
+  deleted_at          DateTime?
+  created_at          DateTime        @default(now())
+  updated_at          DateTime        @updatedAt
+
+  shop_id String
+  shop    Shop   @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+
+  @@unique([external_id, marketplace, shop_id])
+  @@index([shop_id])
+  @@index([sku])
+  @@index([external_updated_at])
+  @@index([shop_id, marketplace, external_updated_at])
+  @@map("products")
+}
+
+enum SyncStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum SyncType {
+  FULL
+  INCREMENTAL
+}
+
+model ProductsSyncControl {
+  id           String          @id @default(uuid())
+  shop_id      String
+  marketplace  MarketplaceType
+  last_sync_at DateTime?
+  last_cursor  String?
+  status       SyncStatus      @default(PENDING)
+  sync_type    SyncType        @default(INCREMENTAL)
+  last_error   String?
+  created_at   DateTime        @default(now())
+  updated_at   DateTime        @updatedAt
+
+  shop Shop @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+
+  @@unique([shop_id, marketplace])
+  @@map("products_sync_control")
 }
