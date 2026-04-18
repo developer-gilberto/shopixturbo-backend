@@ -131,6 +131,7 @@ model ProductsSyncControl {
   id           String          @id @default(uuid())
   shop_id      String
   marketplace  MarketplaceType
+  locked_at    DateTime?
   last_sync_at DateTime?
   last_cursor  String?
   status       SyncStatus      @default(PENDING)
