@@ -1,11 +1,12 @@
-import { Controller, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { DateRangeValidationPipe } from 'src/common/pipes/date-range-validation.pipe';
 import type { TokenPayload } from 'src/common/types/token-payload.type';
 import { GetProductListQueryDTO } from '../products/products.dto';
 import { GetShopDTO } from '../shops/shops.dto';
+import { SyncProductsResponseDTO } from './products-sync.dto';
 import { ProductsSyncService } from './products-sync.service';
 
 @Controller('sync/products')
@@ -15,6 +16,7 @@ export class ProductsSyncController {
   constructor(private readonly productSyncService: ProductsSyncService) {}
 
   @Post('/:shop_id')
+  @ApiResponse({ status: HttpStatus.ACCEPTED, type: SyncProductsResponseDTO })
   async syncProducts(
     @CurrentUser() user: TokenPayload,
     @Param() param: GetShopDTO,

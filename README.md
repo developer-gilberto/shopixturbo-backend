@@ -62,10 +62,14 @@ ShopixTurbo Backend é uma API RESTful desenvolvida com NestJS para integração
 
 - **Autenticação de Usuários**: Registro, login com JWT e verificação de e-mail
 - **Gestão de Usuários**: CRUD completo com proteção por roles
+- **Integração Shopee**: Autorização de loja, gerenciamento de tokens, consulta de informações
+- **Gestão de Produtos**: Listagem, informações detalhadas e sincronização com a Shopee
+- **Gestão de Pedidos**: Consulta de pedidos (em desenvolvimento)
 - **Envio de E-mails**: Sistema de filas com BullMQ para envio assíncrono
 - **Documentação API**: Swagger/OpenAPI integrado com autenticação
 - **Validação de Dados**: Pipes globais de validação com class-validator
 - **Queue System**: Processamento assíncrono de tarefas com Redis
+- **Cache**: Redis para caching de tokens e dados frequentemente acessados
 
 ---
 
@@ -335,6 +339,7 @@ http://localhost:8000/api/v1/docs
 | POST   | `/auth/signin`                    | Login de usuário               | Não  |
 | GET    | `/auth/verify-email`              | Verificar e-mail com token     | Não  |
 | POST   | `/auth/resend-verification-email` | Reenviar e-mail de verificação | Não  |
+| GET    | `/auth/me`                        | Obter usuário autenticado      | Sim  |
 
 #### Usuários (`/api/v1/users`)
 
@@ -355,6 +360,32 @@ http://localhost:8000/api/v1/docs
 | GET    | `/shops/info/:shop_id`    | Obter informações da loja     | Sim (JWT) |
 | GET    | `/shops/profile/:shop_id` | Obter perfil da loja          | Sim (JWT) |
 | GET    | `/shops/full/:shop_id`    | Obter dados completos da loja | Sim (JWT) |
+
+#### Integração Shopee (`/api/v1/integration`)
+
+| Método | Endpoint                              | Descrição                              | Auth      |
+| ------ | ------------------------------------- | -------------------------------------- | --------- |
+| GET    | `/integration/shopee/auth-url`        | Obter URL de autenticação da Shopee    | Sim (JWT) |
+| GET    | `/integration/shopee/callback/access-token` | Callback para obter token de acesso | Sim (JWT) |
+
+#### Produtos (`/api/v1/products`)
+
+| Método | Endpoint                  | Descrição                       | Auth      |
+| ------ | -------------------------- | ------------------------------- | --------- |
+| GET    | `/products/list/:shop_id`  | Listar produtos da loja         | Sim (JWT) |
+| GET    | `/products/info/:shop_id`  | Obter informações dos produtos | Sim (JWT) |
+
+#### Sincronização (`/api/v1/sync/products`)
+
+| Método | Endpoint                  | Descrição                       | Auth      |
+| ------ | -------------------------- | ------------------------------- | --------- |
+| POST   | `/sync/products/:shop_id`  | Sincronizar produtos da loja    | Sim (JWT) |
+
+#### Pedidos (`/api/v1/orders`)
+
+| Método | Endpoint | Descrição | Auth      |
+| ------ | -------- | --------- | --------- |
+| -      | -        | Em desenvolvimento | Sim (JWT) |
 
 ### Exemplo de Uso
 
