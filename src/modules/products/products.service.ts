@@ -1,9 +1,11 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { constants } from 'src/configs/constants.config';
 import { Env } from 'src/configs/env.schema';
 import { ShopeeAuthService } from '../integrations/shopee/auth/shopee-auth.service';
 import { ShopeeTokenService } from '../integrations/shopee/token/shopee-token.service';
-import { GetProductList, GetProductsInfo } from './products.type';
+import { ProductsRepository } from './products.repository';
+import { CreateProductInput, GetProductList, GetProductsInfo } from './products.type';
 
 @Injectable()
 export class ProductsService {
@@ -16,6 +18,7 @@ export class ProductsService {
     private readonly configService: ConfigService<Env>,
     private readonly shopeeTokenService: ShopeeTokenService,
     private readonly shopeeAuthService: ShopeeAuthService,
+    private readonly productsRepo: ProductsRepository,
   ) {
     this.getProductListPath = this.configService.getOrThrow<string>('GET_ITEM_LIST_PATH');
     this.getProductInfoPath = this.configService.getOrThrow<string>('GET_ITEM_BASE_INFO_PATH');
@@ -30,9 +33,13 @@ export class ProductsService {
       shopId: Number(cachedTokenAndShopId.external_shop_id),
     });
 
-    const encodeUrl = encodeURI(
-      `${signedUrl}&offset=${data.offset}&page_size=${data.page_size}&item_status=${data.item_status}&update_time_from=${data.update_time_from}&update_time_to=${data.update_time_to}`,
-    );
+    const urlWithTimeFilter = `${signedUrl}&offset=${data.offset}&page_size=${data.page_size}&item_status=${data.item_status}&update_time_from=${data.update_time_from}&update_time_to=${data.update_time_to}`;
+
+    const urlWithoutTimeFilter = `${signedUrl}&offset=${data.offset}&page_size=${data.page_size}&item_status=${data.item_status}`;
+
+    const hasTimeFilter = data.update_time_from && data.update_time_to;
+
+    const encodeUrl = encodeURI(hasTimeFilter ? urlWithTimeFilter : urlWithoutTimeFilter);
 
     const response = await fetch(encodeUrl);
 
@@ -73,5 +80,26 @@ export class ProductsService {
     const productsInfo = await response.json();
 
     return productsInfo.response;
+  }
+
+  async upsertBulk({ shopId, products }: { shopId: string; products: CreateProductInput[] }) {
+    const MAX_ALLOWED = constants.MAX_NUMBER_PRODUCTS_ALLOWED_FOR_QUERY;
+    if (products.length > MAX_ALLOWED) {
+      throw new BadRequestException(
+        `Limite de produtos para operação no banco de dados excedido: ${products.length} produtos recebidos. Máximo permitido: ${MAX_ALLOWED}`,
+      );
+    }
+
+    const affected = await this.productsRepo.upsertChunk(shopId, products);
+
+    const inserted = affected.filter((product) => product.wasInserted);
+    const updated = affected.filter((product) => !product.wasInserted);
+
+    this.logger.debug(`Produtos inseridos: ${inserted.length}, Produtos atualizados: ${updated.length}.`);
+
+    return {
+      products_inserted: inserted.length,
+      products_updated: updated.length,
+    };
   }
 }

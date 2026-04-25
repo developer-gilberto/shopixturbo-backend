@@ -9,5 +9,6 @@ import { ProductsService } from './products.service';
   imports: [ShopeeAuthModule, ShopeeTokenModule],
   controllers: [ProductsController],
   providers: [ProductsService, ProductsRepository],
+  exports: [ProductsService],
 })
 export class ProductsModule {}

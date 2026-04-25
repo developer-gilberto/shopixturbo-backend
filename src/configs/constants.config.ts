@@ -8,7 +8,15 @@ export const constants = {
   MAIL_QUEUE: 'mail',
   SEND_VERIFICATION_EMAIL_JOB: 'send-verification-email',
 
+  PRODUCTS_SYNC_QUEUE: 'products-sync',
+  PRODUCTS_SYNC_JOB: 'products-sync-job',
+
   ONE_HOUR_IN_SECONDS: 3600,
+  FIVE_MINUTES_IN_MILLISECONDS: 5 * 60 * 1000,
+
+  PAGE_SIZE_PRODUCTS_SYNC: 100,
+  MAX_NUMBER_PRODUCTS_ALLOWED_FOR_QUERY: 100,
+  MAX_PRODUCTS_PAGE: 500,
 };
 
 export type Constants = typeof constants;

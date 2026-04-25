@@ -15,7 +15,7 @@ export class GetProductListQueryDTO {
   @IsInt()
   @Min(1)
   @Max(100)
-  page_size: number = 50;
+  page_size: number = 100;
 
   @IsOptional()
   @Type(() => Number)

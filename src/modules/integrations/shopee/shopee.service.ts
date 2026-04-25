@@ -5,6 +5,8 @@ import { cache } from 'src/configs/cache.config';
 import { Env } from 'src/configs/env.schema';
 import { RedisService } from 'src/database/redis.service';
 import { MarketplaceType } from 'src/generated/prisma/enums';
+import { ProductsSyncProducer } from 'src/modules/products-sync/products-sync.producer';
+import { ProductsSyncService } from 'src/modules/products-sync/products-sync.service';
 import { ShopsService } from 'src/modules/shops/shops.service';
 import { ShopFull, ShopInfo, ShopProfile } from 'src/modules/shops/shops.type';
 import { ShopeeAuthService } from './auth/shopee-auth.service';
@@ -21,9 +23,11 @@ export class ShopeeService {
   constructor(
     private readonly configService: ConfigService<Env>,
     private readonly shopeeAuthService: ShopeeAuthService,
-    private readonly shopService: ShopsService,
     private readonly encryptionService: EncryptionService,
     private readonly redisService: RedisService,
+    private readonly shopService: ShopsService,
+    private readonly productSyncService: ProductsSyncService,
+    private readonly productSyncProducer: ProductsSyncProducer,
   ) {
     this.getShopInfoPath = this.configService.getOrThrow<string>('GET_SHOP_INFO_PATH');
     this.getShopProfilePath = this.configService.getOrThrow<string>('GET_SHOP_PROFILE_PATH');
@@ -125,6 +129,13 @@ export class ShopeeService {
       shopData,
       cache.shopeeShopFullTTL, // 1 hora em segundos
     );
+
+    await this.productSyncService.createInitialRecord({
+      marketplace: MarketplaceType.SHOPEE,
+      shop_id: shop.id,
+    });
+
+    this.productSyncProducer.syncProducts(userId, shop.id);
 
     return {
       message: 'Loja conectada com sucesso',

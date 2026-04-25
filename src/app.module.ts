@@ -3,12 +3,14 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { RateLimitModule } from './common/services/rate-limit/rate-limit.module';
 import { Env, envSchema } from './configs/env.schema';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ShopeeModule } from './modules/integrations/shopee/shopee.module';
 import { MailModule } from './modules/mail/mail.module';
 import { ProductsModule } from './modules/products/products.module';
+import { ProductsSyncModule } from './modules/products-sync/products-sync.module';
 import { ShopsModule } from './modules/shops/shops.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -33,6 +35,8 @@ import { UsersModule } from './modules/users/users.module';
     ShopeeModule,
     ShopsModule,
     ProductsModule,
+    ProductsSyncModule,
+    RateLimitModule,
     AuthModule,
   ],
   controllers: [AppController],
