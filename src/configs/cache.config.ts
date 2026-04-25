@@ -9,6 +9,10 @@ export const cache = {
 
   shopeeShopFullTTL: constants.ONE_HOUR_IN_SECONDS,
   shopeeShopFullKey: (userId: string, shopId: string) => `shopee:full_shop:${userId}:${shopId}`,
+
+  rateLimitKey: (resource: string, shopId: string) => `rate_limit:${resource}:${shopId}`,
+  shopeeRateLimit: 5,
+  shopeeRateLimitWindowMs: 2000,
 };
 
 export type Cache = typeof cache;
