@@ -8,7 +8,7 @@ import { CreateProductInput } from './products.type';
 export class ProductsRepository {
   constructor(private readonly prismaClient: PrismaService) {}
 
-  async upsertChunk(
+  async upsertChunkProducts(
     shopId: string,
     products: CreateProductInput[],
   ): Promise<{ id: string; external_id: string; wasInserted: boolean }[]> {
@@ -74,19 +74,28 @@ export class ProductsRepository {
       },
       update: {
         name: product.name,
+        sku: product.sku,
+        image_url: product.image_url,
         stock: product.stock,
         sale_price_cents: product.sale_price_cents,
+        cost_price_cents: product.cost_price_cents,
+        government_taxes: product.government_taxes,
         external_updated_at: updatedAt,
       },
       create: {
-        external_id: product.external_id,
         marketplace: MarketplaceType.SHOPEE,
         category_id: product.category_id,
-        shop_id: shopId,
         name: product.name,
+        sku: product.sku,
+        image_url: product.image_url,
         stock: product.stock,
         sale_price_cents: product.sale_price_cents,
+        cost_price_cents: product.cost_price_cents,
+        government_taxes: product.government_taxes,
+        external_id: product.external_id,
+        external_created_at: product.external_created_at,
         external_updated_at: updatedAt,
+        shop_id: shopId,
       },
     });
   }

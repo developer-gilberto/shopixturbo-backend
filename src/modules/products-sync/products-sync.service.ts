@@ -132,7 +132,7 @@ export class ProductsSyncService {
         }
 
         if (productsToUpsert.length > 0) {
-          const affected = await this.productService.upsertBulk({ shopId, products: productsToUpsert });
+          const affected = await this.productService.upsertBulkProducts({ shopId, products: productsToUpsert });
           productsInserted += affected.products_inserted;
           productsUpdated += affected.products_updated;
         }

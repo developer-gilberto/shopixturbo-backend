@@ -82,7 +82,7 @@ export class ProductsService {
     return productsInfo.response;
   }
 
-  async upsertBulk({ shopId, products }: { shopId: string; products: CreateProductInput[] }) {
+  async upsertBulkProducts({ shopId, products }: { shopId: string; products: CreateProductInput[] }) {
     const MAX_ALLOWED = constants.MAX_NUMBER_PRODUCTS_ALLOWED_FOR_QUERY;
     if (products.length > MAX_ALLOWED) {
       throw new BadRequestException(
@@ -90,7 +90,7 @@ export class ProductsService {
       );
     }
 
-    const affected = await this.productsRepo.upsertChunk(shopId, products);
+    const affected = await this.productsRepo.upsertChunkProducts(shopId, products);
 
     const inserted = affected.filter((product) => product.wasInserted);
     const updated = affected.filter((product) => !product.wasInserted);
