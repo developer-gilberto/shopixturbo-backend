@@ -9,6 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ShopeeModule } from './modules/integrations/shopee/shopee.module';
 import { MailModule } from './modules/mail/mail.module';
+import { OrdersModule } from './modules/orders/orders.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProductsSyncModule } from './modules/products-sync/products-sync.module';
 import { ShopsModule } from './modules/shops/shops.module';
@@ -38,6 +39,7 @@ import { UsersModule } from './modules/users/users.module';
     ProductsSyncModule,
     RateLimitModule,
     AuthModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

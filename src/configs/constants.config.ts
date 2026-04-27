@@ -17,6 +17,9 @@ export const constants = {
   PAGE_SIZE_PRODUCTS_SYNC: 100,
   MAX_NUMBER_PRODUCTS_ALLOWED_FOR_QUERY: 100,
   MAX_PRODUCTS_PAGE: 500,
+
+  MAX_TIME_INTERVAL_ORDERS: 15,
+  DAY_IN_SECONDS: 60 * 60 * 24,
 };
 
 export type Constants = typeof constants;
