@@ -4,6 +4,7 @@ import { constants } from 'src/configs/constants.config';
 import { Env } from 'src/configs/env.schema';
 import { ShopeeAuthService } from '../integrations/shopee/auth/shopee-auth.service';
 import { ShopeeTokenService } from '../integrations/shopee/token/shopee-token.service';
+import { GetProductFullDTO } from './products.dto';
 import { ProductsRepository } from './products.repository';
 import { CreateProductInput, GetProductList, GetProductsInfo } from './products.type';
 
@@ -101,5 +102,9 @@ export class ProductsService {
       products_inserted: inserted.length,
       products_updated: updated.length,
     };
+  }
+
+  async getProductsFull(_userId: string, shopId: string, pagination: GetProductFullDTO) {
+    return this.productsRepo.getProductsFull(shopId, pagination);
   }
 }

@@ -5,7 +5,13 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { DateRangeValidationPipe } from 'src/common/pipes/date-range-validation.pipe';
 import type { TokenPayload } from 'src/common/types/token-payload.type';
 import { GetShopDTO } from '../shops/shops.dto';
-import { GetProductInfoDTO, GetProductListQueryDTO, GetProductListResponseDTO } from './products.dto';
+import {
+  GetProductFullDTO,
+  GetProductInfoDTO,
+  GetProductListQueryDTO,
+  GetProductListResponseDTO,
+  ProductsFullResponseDTO,
+} from './products.dto';
 import { ProductsService } from './products.service';
 import { GetProductInfoResponseDTO } from './products-info.dto';
 
@@ -45,5 +51,15 @@ export class ProductsController {
       shopId: param.shop_id,
       itemIdList: query.item_id_list,
     });
+  }
+
+  @Get('full/:shop_id')
+  @ApiResponse({ status: HttpStatus.OK, type: ProductsFullResponseDTO })
+  async getProductsFull(
+    @CurrentUser() user: TokenPayload,
+    @Param() data: GetShopDTO,
+    @Query() pagination: GetProductFullDTO,
+  ) {
+    return await this.productService.getProductsFull(user.id, data.shop_id, pagination);
   }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { Prisma } from 'src/generated/prisma/client';
 import { MarketplaceType } from 'src/generated/prisma/enums';
+import { GetProductFullDTO } from './products.dto';
 import { CreateProductInput } from './products.type';
 
 @Injectable()
@@ -98,5 +99,30 @@ export class ProductsRepository {
         shop_id: shopId,
       },
     });
+  }
+
+  async getProductsFull(shopId: string, pagination: GetProductFullDTO) {
+    const [products, totalProducts] = await Promise.all([
+      this.prismaClient.product.findMany({
+        skip: pagination.offset,
+        take: pagination.page_size,
+        orderBy: { created_at: 'desc' },
+        where: { shop_id: shopId },
+      }),
+
+      this.prismaClient.product.count({ where: { shop_id: shopId } }),
+    ]);
+
+    const nextOffset = pagination.offset + pagination.page_size;
+    const hasNextPage = nextOffset < totalProducts;
+
+    return {
+      pagination: {
+        next_offset: hasNextPage ? nextOffset : null,
+        has_next_page: hasNextPage,
+        total_products: totalProducts,
+      },
+      products,
+    };
   }
 }
