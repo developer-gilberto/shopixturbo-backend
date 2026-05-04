@@ -19,6 +19,16 @@ services:
     volumes:
       - redis_data:/data
 
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: shopixturbo-redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      - redis
+
   mailpit:
     image: axllent/mailpit
     container_name: shopixturbo-mailpit
@@ -28,3 +38,4 @@ services:
 
 volumes:
   redis_data:
+  redisinsight_data:
