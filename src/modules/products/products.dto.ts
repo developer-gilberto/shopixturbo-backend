@@ -200,3 +200,54 @@ export class ProductsFullResponseDTO {
   @ApiProperty({ type: [ProductResponseDTO] })
   products: ProductResponseDTO[];
 }
+
+export class UpdateProductCostAndTaxesDTO {
+  @ApiProperty({
+    example: 'a4f88155-5963-43d6-9cf1-492b8a7ac9hj',
+    format: 'uuid',
+    description: 'ID do produto',
+  })
+  id: string;
+
+  @ApiProperty({
+    example: 25000,
+    description: 'Preço de custo em centavos',
+  })
+  @IsNumber()
+  cost_price_cents: number;
+
+  @ApiProperty({
+    example: 500,
+    description: 'Impostos governamentais em centavos',
+  })
+  @IsNumber()
+  government_taxes: number;
+}
+
+export class ProductsUpdateCostAndTaxesDTO {
+  @ApiProperty({
+    type: [UpdateProductCostAndTaxesDTO],
+    description: 'Lista de produtos para atualizar (máximo 100)',
+  })
+  @IsArray()
+  @ArrayMaxSize(100, { message: 'Máximo de 100 produtos por operação' })
+  @ArrayNotEmpty({ message: 'A lista de produtos não pode estar vazia' })
+  @Type(() => UpdateProductCostAndTaxesDTO)
+  products: UpdateProductCostAndTaxesDTO[];
+}
+
+export class UpdateProductCostAndTaxesResponseDTO {
+  @ApiProperty({ example: 'a4f88155-5963-43d6-9cf1-492b8a7ac9hj', format: 'uuid' })
+  id: string;
+
+  @ApiProperty({ example: 25000, description: 'Preço de custo em centavos' })
+  cost_price_cents: number;
+
+  @ApiProperty({ example: 500, description: 'Impostos governamentais em centavos' })
+  government_taxes: number;
+}
+
+export class ProductsUpdateCostAndTaxesResponseDTO {
+  @ApiProperty({ example: '3 produtos foram atualizados.', description: 'Quantidade de produtos atualizados' })
+  message: number;
+}

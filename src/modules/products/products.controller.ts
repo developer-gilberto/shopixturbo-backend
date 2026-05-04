@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Param, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -11,6 +11,8 @@ import {
   GetProductListQueryDTO,
   GetProductListResponseDTO,
   ProductsFullResponseDTO,
+  ProductsUpdateCostAndTaxesDTO,
+  ProductsUpdateCostAndTaxesResponseDTO,
 } from './products.dto';
 import { ProductsService } from './products.service';
 import { GetProductInfoResponseDTO } from './products-info.dto';
@@ -61,5 +63,15 @@ export class ProductsController {
     @Query() pagination: GetProductFullDTO,
   ) {
     return await this.productService.getProductsFull(user.id, data.shop_id, pagination);
+  }
+
+  @Patch('cost-taxes/:shop_id')
+  @ApiResponse({ status: HttpStatus.OK, type: ProductsUpdateCostAndTaxesResponseDTO })
+  async updateCostAndTaxes(
+    @CurrentUser() user: TokenPayload,
+    @Param() param: GetShopDTO,
+    @Body() data: ProductsUpdateCostAndTaxesDTO,
+  ) {
+    return await this.productService.updateCostAndTaxes(user.id, param.shop_id, data);
   }
 }

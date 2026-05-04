@@ -4,7 +4,7 @@ import { constants } from 'src/configs/constants.config';
 import { Env } from 'src/configs/env.schema';
 import { ShopeeAuthService } from '../integrations/shopee/auth/shopee-auth.service';
 import { ShopeeTokenService } from '../integrations/shopee/token/shopee-token.service';
-import { GetProductFullDTO } from './products.dto';
+import { GetProductFullDTO, ProductsUpdateCostAndTaxesDTO } from './products.dto';
 import { ProductsRepository } from './products.repository';
 import { CreateProductInput, GetProductList, GetProductsInfo } from './products.type';
 
@@ -106,5 +106,19 @@ export class ProductsService {
 
   async getProductsFull(_userId: string, shopId: string, pagination: GetProductFullDTO) {
     return this.productsRepo.getProductsFull(shopId, pagination);
+  }
+
+  async updateCostAndTaxes(_userId: string, shopId: string, data: ProductsUpdateCostAndTaxesDTO) {
+    if (data.products.length > constants.MAX_NUMBER_PRODUCTS_TO_UPDATE) {
+      throw new BadRequestException(
+        `Não é possível atualizar mais de ${constants.MAX_NUMBER_PRODUCTS_TO_UPDATE} produtos por operação`,
+      );
+    }
+
+    const totalUpdatedProducts = await this.productsRepo.updateCostAndTaxes(shopId, data.products);
+
+    return {
+      message: `${totalUpdatedProducts.length} produtos foram atualizados.`,
+    };
   }
 }

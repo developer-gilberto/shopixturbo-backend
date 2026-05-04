@@ -106,7 +106,7 @@ export class ProductsRepository {
       this.prismaClient.product.findMany({
         skip: pagination.offset,
         take: pagination.page_size,
-        orderBy: { created_at: 'desc' },
+        orderBy: { updated_at: 'desc' },
         where: { shop_id: shopId },
       }),
 
@@ -124,5 +124,34 @@ export class ProductsRepository {
       },
       products,
     };
+  }
+
+  async updateCostAndTaxes(
+    shopId: string,
+    products: Array<{
+      id: string;
+      cost_price_cents: number;
+      government_taxes: number;
+    }>,
+  ) {
+    const operations = products.map((product) =>
+      this.prismaClient.product.updateMany({
+        where: {
+          id: product.id,
+          shop_id: shopId,
+          deleted_at: null,
+        },
+        data: {
+          ...(product.cost_price_cents !== undefined && {
+            cost_price_cents: product.cost_price_cents,
+          }),
+          ...(product.government_taxes !== undefined && {
+            government_taxes: product.government_taxes,
+          }),
+        },
+      }),
+    );
+
+    return this.prismaClient.$transaction(operations);
   }
 }

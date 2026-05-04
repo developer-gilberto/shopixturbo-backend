@@ -20,6 +20,8 @@ export const constants = {
 
   MAX_TIME_INTERVAL_ORDERS: 15,
   DAY_IN_SECONDS: 60 * 60 * 24,
+
+  MAX_NUMBER_PRODUCTS_TO_UPDATE: 100,
 };
 
 export type Constants = typeof constants;
