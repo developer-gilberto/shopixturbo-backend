@@ -154,4 +154,11 @@ export class ProductsRepository {
 
     return this.prismaClient.$transaction(operations);
   }
+
+  async getEspecificProductsByIds(shopId: string, productsIds: string[]) {
+    return this.prismaClient.product.findMany({
+      where: { shop_id: shopId, external_id: { in: productsIds } },
+      orderBy: { updated_at: 'desc' },
+    });
+  }
 }

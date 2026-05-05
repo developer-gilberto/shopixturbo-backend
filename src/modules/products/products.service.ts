@@ -121,4 +121,8 @@ export class ProductsService {
       message: `${totalUpdatedProducts.length} produtos foram atualizados.`,
     };
   }
+
+  async getEspecificProductsByIds(_userId: string, shopId: string, productsIds: string[]) {
+    return this.productsRepo.getEspecificProductsByIds(shopId, productsIds);
+  }
 }
