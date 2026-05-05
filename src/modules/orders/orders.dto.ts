@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { ArrayMaxSize, ArrayNotEmpty, IsArray, IsEnum, IsInt, IsString, Max, Min, MinLength } from 'class-validator';
 import { OrderStatus, TimeRangeField } from './orders.enum';
@@ -50,4 +51,23 @@ export class OrdersDetailsDTO {
   @IsString({ each: true, message: 'Todos os order_id devem ser strings.' })
   @MinLength(1, { each: true, message: 'Os order_id não podem ser strings vazias.' })
   order_id_list: string[];
+}
+
+export class OrderListItemDTO {
+  @ApiProperty({ example: '260426RTQ27DRJ' })
+  order_sn: string;
+
+  @ApiProperty({ example: '' })
+  booking_sn: string;
+}
+
+export class OrderListResponseDTO {
+  @ApiProperty({ example: false })
+  more: boolean;
+
+  @ApiProperty({ example: '20' })
+  next_cursor: string;
+
+  @ApiProperty({ type: [OrderListItemDTO] })
+  order_list: OrderListItemDTO[];
 }
