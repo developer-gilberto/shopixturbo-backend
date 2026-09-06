@@ -4,7 +4,7 @@ import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 import { MarketplaceType, ShopStatus } from 'src/generated/prisma/enums';
 
 export class CallbackGetTokenDTO {
-  @ApiProperty({ description: 'O código da URL de redirecionamento' })
+  @ApiProperty({ description: 'O código da URL de redirecionamento', example: '27d1b63c6f7d4d0a9b5e2f8c3a1d4e5f' })
   @IsNotEmpty({ message: 'O código da URL de redirecionamento é obrigatório' })
   @IsString({ message: 'O código da URL de redirecionamento deve ser uma string' })
   @MinLength(2, { message: 'O código da URL de redirecionamento deve ter pelo menos 2 caracteres' })
@@ -12,7 +12,7 @@ export class CallbackGetTokenDTO {
   @Transform(({ value }) => value?.trim())
   code: string;
 
-  @ApiProperty({ description: 'O ID da loja' })
+  @ApiProperty({ description: 'O ID da loja', example: '123456' })
   @IsNotEmpty({ message: 'O ID da loja é obrigatório' })
   @IsString({ message: 'O ID da loja deve ser uma string' })
   @MaxLength(255, { message: 'O ID da loja deve ter no máximo 255 caracteres' })

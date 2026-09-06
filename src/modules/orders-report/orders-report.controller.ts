@@ -15,7 +15,11 @@ export class OrdersReportController {
   constructor(private readonly ordersReportService: OrdersReportService) {}
 
   @Get('orders/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: OrdersReportResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: OrdersReportResponseDTO,
+    description: 'Gera relatório de custos, impostos e lucros dos pedidos',
+  })
   async getOrdersReport(@CurrentUser() user: TokenPayload, @Param() param: GetShopDTO, @Query() query: OrdersListDTO) {
     return await this.ordersReportService.getOrdersReport({
       userId: user.id,
@@ -29,7 +33,11 @@ export class OrdersReportController {
   }
 
   @Get('orders/payment/escrow_detail_batch/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: [EscrowDetailResponseDTO] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: [EscrowDetailResponseDTO],
+    description: 'Retorna os detalhes de escrow (financeiro) de pedidos específicos',
+  })
   async getEscrowDetailsBatch(
     @CurrentUser() user: TokenPayload,
     @Param() param: GetShopDTO,

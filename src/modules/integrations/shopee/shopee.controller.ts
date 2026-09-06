@@ -13,14 +13,22 @@ export class ShopeeController {
   constructor(private readonly shopeeService: ShopeeService) {}
 
   @Get('shopee/auth-url')
-  @ApiResponse({ status: HttpStatus.OK, type: AuthUrlResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: AuthUrlResponseDTO,
+    description: 'Gera a URL de autorização da Shopee para conectar uma loja',
+  })
   async getAuthUrl() {
     const authUrl = this.shopeeService.getAuthUrl();
     return { auth_url: authUrl };
   }
 
   @Get('shopee/callback/access-token')
-  @ApiResponse({ status: HttpStatus.OK, type: CallbackGetTokenResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: CallbackGetTokenResponseDTO,
+    description: 'Processa o callback de autorização e conecta a loja',
+  })
   async handleCallbackGetToken(@CurrentUser() user: TokenPayload, @Query() data: CallbackGetTokenDTO) {
     return await this.shopeeService.handleCallback(user.id, data);
   }

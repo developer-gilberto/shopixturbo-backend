@@ -27,13 +27,21 @@ export class AuthController {
   ) {}
 
   @Post('signup')
-  @ApiResponse({ status: HttpStatus.CREATED, type: SignUpResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    type: SignUpResponseDTO,
+    description: 'Cria um novo usuário e envia email de verificação',
+  })
   async signUp(@Body() data: SignUpDTO) {
     return await this.authService.signup(data);
   }
 
   @Post('signin')
-  @ApiResponse({ status: HttpStatus.OK, type: SignInResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: SignInResponseDTO,
+    description: 'Autentica o usuário e retorna o token JWT',
+  })
   async signIn(@Body() data: SignInDTO) {
     return await this.authService.signin(data);
   }
@@ -51,7 +59,11 @@ export class AuthController {
   }
 
   @Post('resend-verification-email')
-  @ApiResponse({ status: HttpStatus.ACCEPTED, type: ResendVerifyEmailResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.ACCEPTED,
+    type: ResendVerifyEmailResponseDTO,
+    description: 'Reenvia o email de verificação para o usuário',
+  })
   async resendVerificationEmail(@Body() body: EmailDTO) {
     return this.authService.resendVerificationEmail(body.email);
   }
@@ -59,7 +71,7 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('jwt')
-  @ApiResponse({ status: HttpStatus.OK, type: UserResponseDTO })
+  @ApiResponse({ status: HttpStatus.OK, type: UserResponseDTO, description: 'Retorna os dados do usuário autenticado' })
   async me(@CurrentUser() user: TokenPayload): Promise<UserResponseDTO> {
     return this.authService.me(user.id);
   }

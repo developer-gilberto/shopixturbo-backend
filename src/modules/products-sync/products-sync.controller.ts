@@ -16,7 +16,11 @@ export class ProductsSyncController {
   constructor(private readonly productSyncService: ProductsSyncService) {}
 
   @Post('/:shop_id')
-  @ApiResponse({ status: HttpStatus.ACCEPTED, type: SyncProductsResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.ACCEPTED,
+    type: SyncProductsResponseDTO,
+    description: 'Dispara a sincronização de produtos da loja (assíncrono, via fila)',
+  })
   async syncProducts(
     @CurrentUser() user: TokenPayload,
     @Param() param: GetShopDTO,

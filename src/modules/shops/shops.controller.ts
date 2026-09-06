@@ -13,19 +13,27 @@ export class ShopsController {
   constructor(private readonly shopService: ShopsService) {}
 
   @Get('info/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: GetShopInfoResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: GetShopInfoResponseDTO,
+    description: 'Retorna informações gerais da loja (nome, região, status, autorização)',
+  })
   async getShopInfoById(@CurrentUser() user: TokenPayload, @Param() data: GetShopDTO) {
     return await this.shopService.getShopInfo(user.id, data.shop_id);
   }
 
   @Get('profile/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: GetShopProfileResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: GetShopProfileResponseDTO,
+    description: 'Retorna o perfil da loja (logo, descrição, nome)',
+  })
   async getShopProfileById(@CurrentUser() user: TokenPayload, @Param() data: GetShopDTO) {
     return await this.shopService.getShopProfile(user.id, data.shop_id);
   }
 
   @Get('full/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: ShopFullResponseDTO })
+  @ApiResponse({ status: HttpStatus.OK, type: ShopFullResponseDTO, description: 'Retorna os dados completos da loja' })
   async getShopFullById(@CurrentUser() user: TokenPayload, @Param() data: GetShopDTO) {
     return await this.shopService.getShopFullByIdAndUserId(user.id, data.shop_id);
   }

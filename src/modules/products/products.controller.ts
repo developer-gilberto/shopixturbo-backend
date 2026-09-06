@@ -24,7 +24,11 @@ export class ProductsController {
   constructor(private readonly productService: ProductsService) {}
 
   @Get('list/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: GetProductListResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: GetProductListResponseDTO,
+    description: 'Lista os produtos da loja com paginação e filtros',
+  })
   async getProductList(
     @CurrentUser() user: TokenPayload,
     @Param() param: GetShopDTO,
@@ -42,7 +46,11 @@ export class ProductsController {
   }
 
   @Get('info/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: GetProductInfoResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: GetProductInfoResponseDTO,
+    description: 'Retorna informações detalhadas dos produtos da Shopee',
+  })
   async getProducsInfo(
     @CurrentUser() user: TokenPayload,
     @Param() param: GetShopDTO,
@@ -56,7 +64,11 @@ export class ProductsController {
   }
 
   @Get('full/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: ProductsFullResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ProductsFullResponseDTO,
+    description: 'Retorna os produtos completos do catálogo interno',
+  })
   async getProductsFull(
     @CurrentUser() user: TokenPayload,
     @Param() data: GetShopDTO,
@@ -66,7 +78,11 @@ export class ProductsController {
   }
 
   @Patch('cost-taxes/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: ProductsUpdateCostAndTaxesResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ProductsUpdateCostAndTaxesResponseDTO,
+    description: 'Atualiza custo e impostos de um lote de produtos',
+  })
   async updateCostAndTaxes(
     @CurrentUser() user: TokenPayload,
     @Param() param: GetShopDTO,

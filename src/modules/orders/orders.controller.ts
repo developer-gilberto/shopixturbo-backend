@@ -15,7 +15,11 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Get('list/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: OrderListResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: OrderListResponseDTO,
+    description: 'Lista os pedidos da loja com paginação e filtros',
+  })
   async getOrderList(@CurrentUser() user: TokenPayload, @Param() param: GetShopDTO, @Query() query: OrdersListDTO) {
     return await this.ordersService.getOrderList({
       userId: user.id,
@@ -29,7 +33,11 @@ export class OrdersController {
   }
 
   @Get('details/:shop_id')
-  @ApiResponse({ status: HttpStatus.OK, type: OrderDetailListResponseDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: OrderDetailListResponseDTO,
+    description: 'Retorna os detalhes de pedidos específicos',
+  })
   async getOrderDetails(
     @CurrentUser() user: TokenPayload,
     @Param() param: GetShopDTO,

@@ -11,7 +11,7 @@ export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
   @Get(':user_id')
-  @ApiResponse({ status: HttpStatus.OK, type: UserResponseDTO })
+  @ApiResponse({ status: HttpStatus.OK, type: UserResponseDTO, description: 'Retorna os dados de um usuário pelo ID' })
   async getUserById(@Param('user_id', ParseUUIDPipe) userId: string) {
     return await this.userService.getById(userId);
   }

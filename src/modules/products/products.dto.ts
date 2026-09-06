@@ -4,12 +4,14 @@ import { ArrayMaxSize, ArrayNotEmpty, IsArray, IsEnum, IsInt, IsNumber, IsOption
 import { ItemStatus } from './products.enum';
 
 export class GetProductListQueryDTO {
+  @ApiPropertyOptional({ example: 0, description: 'Offset para paginação' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
   offset: number = 0;
 
+  @ApiPropertyOptional({ example: 20, description: 'Quantidade de itens por página (1-100)' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -17,16 +19,19 @@ export class GetProductListQueryDTO {
   @Max(100)
   page_size: number = 100;
 
+  @ApiPropertyOptional({ example: 1776198667, description: 'Listar produtos atualizados a partir deste timestamp' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   update_time_from?: number;
 
+  @ApiPropertyOptional({ example: 1776198667, description: 'Listar produtos atualizados até este timestamp' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   update_time_to?: number;
 
+  @ApiPropertyOptional({ enum: ItemStatus, example: ItemStatus.NORMAL, description: 'Filtrar por status do item' })
   @IsOptional()
   @IsEnum(ItemStatus)
   item_status: ItemStatus;
@@ -79,6 +84,10 @@ export class GetProductListResponseDTO {
 }
 
 export class GetProductInfoDTO {
+  @ApiProperty({
+    example: [885177996, 885178150],
+    description: 'Lista de IDs dos produtos (máximo 50)',
+  })
   @Transform(({ value }) => {
     if (typeof value !== 'string') return [];
 
@@ -97,11 +106,13 @@ export class GetProductInfoDTO {
 }
 
 export class GetProductFullDTO {
+  @ApiProperty({ example: 0, description: 'Offset para paginação' })
   @Type(() => Number)
   @IsInt()
   @Min(0)
   offset: number = 0;
 
+  @ApiProperty({ example: 20, description: 'Quantidade de itens por página (1-100)' })
   @Type(() => Number)
   @IsInt()
   @Min(1)

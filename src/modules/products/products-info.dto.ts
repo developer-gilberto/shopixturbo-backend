@@ -1,188 +1,188 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class AttributeValueDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   value_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Branco' })
   original_value_name: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '' })
   value_unit: string;
 }
 
 export class PriceInfoDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 'BRL' })
   currency: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 99.9 })
   original_price: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 79.9 })
   current_price: number;
 }
 
 export class DimensionDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 20 })
   package_length: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 15 })
   package_width: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 10 })
   package_height: number;
 }
 
 export class LogisticDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 6 })
   logistic_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Sandbox Shopee Xpress' })
   logistic_name: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: true })
   enabled: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   size_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: false })
   is_free: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ example: 9.62 })
   estimated_shipping_fee: number;
 }
 
 export class PreOrderDTO {
-  @ApiProperty()
+  @ApiProperty({ example: false })
   is_pre_order: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ example: 2 })
   days_to_ship: number;
 }
 
 export class BrandDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   brand_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: '' })
   original_brand_name: string;
 }
 
 export class FieldDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 'text' })
   field_type: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Descrição do produto...' })
   text: string;
 }
 
 export class SummaryInfoDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 46 })
   total_reserved_stock: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 46 })
   total_available_stock: number;
 }
 
 export class SellerStockDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 'BRZ' })
   location_id: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 46 })
   stock: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: true })
   if_saleable: boolean;
 }
 
 export class ShopeeStockDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 'BRZ' })
   location_id: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 46 })
   stock: number;
 }
 
 export class AdvanceStockDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   sellable_advance_stock: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   in_transit_advance_stock: number;
 }
 
 export class TagDTO {
-  @ApiProperty()
+  @ApiProperty({ example: false })
   kit: boolean;
 }
 
 export class PurchaseLimitDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   min_purchase_limit: number;
 }
 
 export class AttributeDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 53380 })
   attribute_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Colour' })
   original_attribute_name: string;
 
   @ApiProperty({ type: [AttributeValueDTO] })
   attribute_value_list: AttributeValueDTO[];
 
-  @ApiProperty()
+  @ApiProperty({ example: true })
   is_mandatory: boolean;
 }
 
 export class ImageDTO {
-  @ApiProperty({ type: [String] })
+  @ApiProperty({ example: ['5fdae8d81b91e3f05d1e4e49'], type: [String] })
   image_id_list: string[];
 
-  @ApiProperty({ type: [String] })
+  @ApiProperty({ example: ['https://cf.shopee.com.br/file/br-11134207-81z1k-mngb6gk43r40jj'], type: [String] })
   image_url_list: string[];
 
-  @ApiProperty()
+  @ApiProperty({ example: '1:1' })
   image_ratio: string;
 }
 
 export class PromotionImageDTO {
-  @ApiProperty({ type: [String] })
+  @ApiProperty({ example: [], type: [String] })
   image_id_list: string[];
 
-  @ApiProperty({ type: [String] })
+  @ApiProperty({ example: [], type: [String] })
   image_url_list: string[];
 }
 
 export class TaxInfoDTO {
-  @ApiProperty() ncm: string;
-  @ApiProperty() same_state_cfop: string;
-  @ApiProperty() diff_state_cfop: string;
-  @ApiProperty() csosn: string;
-  @ApiProperty() origin: string;
-  @ApiProperty() cest: string;
-  @ApiProperty() measure_unit: string;
-  @ApiProperty() pis_cofins_cst: string;
-  @ApiProperty() federal_state_taxes: string;
-  @ApiProperty() operation_type: string;
-  @ApiProperty() ex_tipi: string;
-  @ApiProperty() fci_num: string;
-  @ApiProperty() recopi_num: string;
-  @ApiProperty() additional_info: string;
+  @ApiProperty({ example: '6109.10.00' }) ncm: string;
+  @ApiProperty({ example: '5102' }) same_state_cfop: string;
+  @ApiProperty({ example: '6102' }) diff_state_cfop: string;
+  @ApiProperty({ example: '101' }) csosn: string;
+  @ApiProperty({ example: '0' }) origin: string;
+  @ApiProperty({ example: '9999999' }) cest: string;
+  @ApiProperty({ example: 'UN' }) measure_unit: string;
+  @ApiProperty({ example: '01' }) pis_cofins_cst: string;
+  @ApiProperty({ example: '0' }) federal_state_taxes: string;
+  @ApiProperty({ example: '1' }) operation_type: string;
+  @ApiProperty({ example: '0' }) ex_tipi: string;
+  @ApiProperty({ example: '' }) fci_num: string;
+  @ApiProperty({ example: '' }) recopi_num: string;
+  @ApiProperty({ example: '' }) additional_info: string;
 }
 
 export class ComplaintPolicyDTO {
-  @ApiProperty()
+  @ApiProperty({ example: '7 dias' })
   warranty_time: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: false })
   exclude_entrepreneur_warranty: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   complaint_address_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: '' })
   additional_information: string;
 }
 
@@ -211,22 +211,22 @@ export class StockInfoDTO {
 }
 
 export class ItemDTO {
-  @ApiProperty()
+  @ApiProperty({ example: 885177996 })
   item_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 100022 })
   category_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Mesa 4 cadeiras' })
   item_name: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'mesa-sku' })
   item_sku: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 1776198667 })
   create_time: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 1776198667 })
   update_time: number;
 
   @ApiProperty({ type: [AttributeDTO] })
@@ -238,7 +238,7 @@ export class ItemDTO {
   @ApiProperty({ type: ImageDTO })
   image: ImageDTO;
 
-  @ApiProperty()
+  @ApiProperty({ example: '2000' })
   weight: string;
 
   @ApiProperty({ type: DimensionDTO })
@@ -250,28 +250,28 @@ export class ItemDTO {
   @ApiProperty({ type: PreOrderDTO })
   pre_order: PreOrderDTO;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'new' })
   condition: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '' })
   size_chart: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'NORMAL' })
   item_status: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: true })
   has_model: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   promotion_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: false })
   has_promotion: boolean;
 
   @ApiProperty({ type: BrandDTO })
   brand: BrandDTO;
 
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   item_dangerous: number;
 
   @ApiProperty({ type: TaxInfoDTO })
@@ -283,31 +283,31 @@ export class ItemDTO {
   @ApiProperty({ type: DescriptionInfoDTO })
   description_info: DescriptionInfoDTO;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'extended' })
   description_type: string;
 
   @ApiProperty({ type: StockInfoDTO })
   stock_info_v2: StockInfoDTO;
 
-  @ApiProperty()
+  @ApiProperty({ example: '' })
   gtin_code: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   size_chart_id: number;
 
   @ApiProperty({ type: PromotionImageDTO })
   promotion_image: PromotionImageDTO;
 
-  @ApiProperty()
+  @ApiProperty({ example: '' })
   deboost: string;
 
   @ApiProperty({ type: Object })
   compatibility_info: Record<string, unknown>;
 
-  @ApiProperty()
+  @ApiProperty({ example: 0 })
   authorised_brand_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: false })
   is_fulfillment_by_shopee: boolean;
 
   @ApiProperty({ type: TagDTO })
