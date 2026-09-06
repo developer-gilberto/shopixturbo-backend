@@ -1,21 +1,18 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+import { OrdersReportController } from './orders-report.controller';
+import { OrdersReportService } from './orders-report.service';
 
-describe('UsersController', () => {
-  let controller: UsersController;
+describe('OrdersReportController', () => {
+  let controller: OrdersReportController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UsersController],
+      controllers: [OrdersReportController],
       providers: [
         {
-          provide: UsersService,
-          useValue: {
-            getByEmail: jest.fn(),
-            create: jest.fn(),
-          },
+          provide: OrdersReportService,
+          useValue: {},
         },
         {
           provide: JwtService,
@@ -24,7 +21,7 @@ describe('UsersController', () => {
       ],
     }).compile();
 
-    controller = module.get<UsersController>(UsersController);
+    controller = module.get<OrdersReportController>(OrdersReportController);
   });
 
   it('should be defined', () => {
