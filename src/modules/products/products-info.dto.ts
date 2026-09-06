@@ -302,7 +302,7 @@ export class ItemDTO {
   deboost: string;
 
   @ApiProperty({ type: Object })
-  compatibility_info: Record<string, any>;
+  compatibility_info: Record<string, unknown>;
 
   @ApiProperty()
   authorised_brand_id: number;
