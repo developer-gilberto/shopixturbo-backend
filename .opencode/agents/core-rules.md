@@ -1,5 +1,5 @@
 ---
-name: shopixturbo-core-rules
+name: core-rules
 description: Define as regras, padrões e decisões arquiteturais. Cria módulos NestJS seguindo o padrão do shopixturbo (controller,
 service, repository, DTO, swagger). Use sempre que o usuário pedir
 para criar um módulo, endpoint, recurso, entidade, ou qualquer
