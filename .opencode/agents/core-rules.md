@@ -81,7 +81,7 @@ Cada domínio deve conter:
 1. Entender a tarefa
 2. Escrever testes primeiro (TDD)
 3. Implementar
-4. Rodar `typecheck` + `test` + `lint`
+4. Rodar `build` (typecheck) + `test` + `lint`
 5. Depois de todos os testes passarem, tarefa concluída
 
 ---
@@ -110,6 +110,14 @@ Cada domínio deve conter:
 - Guards devem ser usados para proteger rotas
 - Payload do token deve ser tipado (`TokenPayload`)
 - Nunca confiar em dados vindos do cliente
+
+---
+
+## ⏱️ Rate Limiting
+
+- A aplicação possui `RateLimitModule`/`RateLimitService` global
+- Usar para proteger rotas sensíveis contra abuso e ataques de força bruta
+- Configuração de limites deve ser centralizada no serviço de rate limit
 
 ---
 
@@ -232,7 +240,7 @@ Seguir Conventional Commits:
 ## 📈 Evolução Esperada
 
 - Testes automatizados (unitários, integração e e2e)
-- Rate limiting
+- Rate limiting (✅ implementado via `RateLimitService` global)
 - Cache em endpoints necessários
 - Monitoramento e logs estruturados
 - CI/CD

@@ -67,9 +67,10 @@ ShopixTurbo Backend é uma API RESTful desenvolvida com NestJS para integração
 - **Gestão de Pedidos**: Consulta de pedidos e detalhes de pagamento/escrow (get_escrow_detail_batch)
 - **Relatório de Custos e Lucros**: Cruzamento dos dados financeiros da Shopee com o preço de custo e impostos do governo armazenados no catálogo interno, gerando relatório completo de receita, custo, lucro líquido e margem por pedido/item
 - **Envio de E-mails**: Sistema de filas com BullMQ para envio assíncrono
-- **Documentação API**: Swagger/OpenAPI integrado com autenticação
+- **Documentação API**: Swagger/OpenAPI integrado com autenticação, com descrições e exemplos de request/response em todos os endpoints
 - **Validação de Dados**: Pipes globais de validação com class-validator
 - **Queue System**: Processamento assíncrono de tarefas com Redis
+- **Rate Limiting**: Serviço global de limitação de requisições (`RateLimitService`)
 - **Cache**: Redis para caching de tokens e dados frequentemente acessados
 
 ---
@@ -125,6 +126,8 @@ shopixturbo-backend/
 │   │   ├── decorators/             # Decorators (@CurrentUser, etc)
 │   │   ├── guards/                 # Guards (JwtAuthGuard)
 │   │   ├── types/                  # Types (TokenPayload)
+│   │   ├── services/               # Serviços globais
+│   │   │   └── rate-limit/         # Rate limiting da API
 │   │   └── encryption/             # Utilitários de criptografia
 │   ├── modules/                    # Módulos de features
 │   │   ├── auth/                   # Módulo de autenticação
@@ -133,6 +136,7 @@ shopixturbo-backend/
 │   │   ├── shops/                  # Módulo de lojas (Shopee)
 │   │   ├── orders/                 # Módulo de pedidos (listagem e detalhes)
 │   │   ├── products/               # Módulo de produtos (custo e impostos)
+│   │   ├── products-sync/          # Módulo de sincronização de produtos
 │   │   ├── orders-report/          # Relatório de custos e lucros dos pedidos
 │   │   └── integrations/           # Módulo de integrações
 │   └── generated/                  # Cliente Prisma gerado
@@ -335,6 +339,8 @@ A documentação interativa da API está disponível em:
 http://localhost:8000/api/v1/docs
 ```
 
+Todos os endpoints possuem **descrições** e **exemplos de request/response** (payloads realistas) mapeados via `@ApiProperty({ example })` nos DTOs e `@ApiResponse` nos controllers. Use o botão **Authorize** para testar endpoints autenticados.
+
 ### Endpoints Principais
 
 #### Autenticação (`/api/v1/auth`)
@@ -376,10 +382,12 @@ http://localhost:8000/api/v1/docs
 
 #### Produtos (`/api/v1/products`)
 
-| Método | Endpoint                  | Descrição                       | Auth      |
-| ------ | -------------------------- | ------------------------------- | --------- |
-| GET    | `/products/list/:shop_id`  | Listar produtos da loja         | Sim (JWT) |
-| GET    | `/products/info/:shop_id`  | Obter informações dos produtos | Sim (JWT) |
+| Método | Endpoint                       | Descrição                                          | Auth      |
+| ------ | ------------------------------ | -------------------------------------------------- | --------- |
+| GET    | `/products/list/:shop_id`      | Listar produtos da loja com paginação e filtros    | Sim (JWT) |
+| GET    | `/products/info/:shop_id`      | Obter informações detalhadas dos produtos Shopee   | Sim (JWT) |
+| GET    | `/products/full/:shop_id`      | Obter produtos completos do catálogo interno       | Sim (JWT) |
+| PATCH  | `/products/cost-taxes/:shop_id` | Atualizar custo e impostos de um lote de produtos | Sim (JWT) |
 
 #### Sincronização (`/api/v1/sync/products`)
 
@@ -389,9 +397,10 @@ http://localhost:8000/api/v1/docs
 
 #### Pedidos (`/api/v1/orders`)
 
-| Método | Endpoint | Descrição | Auth      |
-| ------ | -------- | --------- | --------- |
-| -      | -        | Em desenvolvimento | Sim (JWT) |
+| Método | Endpoint               | Descrição                                                      | Auth      |
+| ------ | ---------------------- | -------------------------------------------------------------- | --------- |
+| GET    | `/orders/list/:shop_id`    | Listar pedidos da loja com paginação e filtros            | Sim (JWT) |
+| GET    | `/orders/details/:shop_id` | Retornar detalhes de pedidos específicos                  | Sim (JWT) |
 
 #### Relatórios (`/api/v1/report`)
 
@@ -434,13 +443,38 @@ curl -X POST http://localhost:8000/api/v1/auth/signin \
   }'
 ```
 
+**Usando um endpoint protegido (ex.: obter dados da loja):**
+
+Após o login, use o token JWT retornado no header `Authorization`:
+
+```bash
+curl -X GET http://localhost:8000/api/v1/shops/info/123456 \
+  -H "Authorization: Bearer <seu_token_jwt>"
+```
+
+Todos os endpoints protegidos (autenticados) exigem o header `Authorization: Bearer <token>` e são marcados com o selo "Auth" nas tabelas de endpoints acima. A documentação interativa do Swagger (`/api/v1/docs`) já vem configurada com o botão "Authorize" para facilitar os testes.
+
 ---
 
 ## Banco de Dados
 
 ### Schema Prisma
 
-O projeto utiliza Prisma ORM com PostgreSQL. O schema principal define o modelo de usuário:
+O projeto utiliza Prisma ORM com PostgreSQL. O schema define os seguintes modelos:
+
+| Modelo                 | Descrição                                              | Tabela                  |
+| ---------------------- | ------------------------------------------------------ | ----------------------- |
+| `User`                 | Usuários da plataforma                                 | `users`                 |
+| `Shop`                 | Lojas conectadas (Shopee, Amazon, Mercado Livre)       | `shops`                 |
+| `MarketplaceToken`     | Tokens de acesso/refresh criptografados por loja       | `marketplace_tokens`    |
+| `Product`              | Produtos do catálogo interno (custo, impostos, estoque)| `products`              |
+| `ProductsSyncControl`  | Controle de sincronização de produtos por loja         | `products_sync_control` |
+
+**Enums:** `UserRole` (USER, ADMIN), `ShopStatus` (NORMAL, BANNED, FROZEN), `MarketplaceType` (SHOPEE, MERCADO_LIVRE, AMAZON), `SyncStatus` (PENDING, RUNNING, COMPLETED, FAILED), `SyncType` (FULL, INCREMENTAL).
+
+Todos os nomes de tabelas e colunas usam **snake_case** no banco de dados.
+
+Exemplo do modelo `User`:
 
 ```prisma
 model User {
@@ -454,6 +488,8 @@ model User {
   email_verification_token_expires_at DateTime?
   created_at                          DateTime  @default(now())
   updated_at                          DateTime  @updatedAt
+
+  shops Shop[]
 
   @@map("users")
 }
@@ -469,8 +505,11 @@ enum UserRole {
 As migrations são gerenciadas via Prisma:
 
 ```bash
-# Criar nova migration
+# Aplicar migrações pendentes ao banco (produção/deploy)
 pnpm run prisma:migrate
+
+# Criar nova migration em desenvolvimento
+npx prisma migrate dev --name "descricao_da_mudanca"
 
 # Gerar cliente Prisma
 pnpm run prisma:generate
@@ -497,15 +536,21 @@ O `docker-compose.yaml` inclui:
 
 O projeto utiliza BullMQ com Redis para processamento assíncrono de tarefas:
 
-**Mail Queue:**
+**Mail Queue** (`mail.queue`):
 
-- **Produtor** (`mail.producer.ts`): Adiciona jobs à fila
-- **Processador** (`mail.processor.ts`): Processa os jobs da fila
+- **Produtor** (`mail.producer.ts`): Adiciona jobs de e-mail à fila
+- **Processador** (`mail.processor.ts`): Processa os jobs de envio de e-mail
+
+**Products Sync Queue** (`products-sync.queue`):
+
+- **Produtor** (`products-sync.producer.ts`): Adiciona jobs de sincronização de produtos à fila
+- **Processador** (`products-sync.processor.ts`): Processa a sincronização de produtos da loja
+- Cada job é identificado por `products-sync-shop-{shopId}-user-{userId}` (idempotente)
 
 **Configurações:**
 
 - Retry: 3 tentativas
-- Backoff: Exponencial
+- Backoff: Exponencial (delay de 2s)
 - Remove on complete: Sim
 - Remove on fail: Não
 
@@ -536,6 +581,18 @@ pnpm run test:e2e
 
 - **Unitários**: Arquivos `*.spec.ts` junto aos módulos
 - **E2E**: Diretório `test/` com configuração em `jest-e2e.json`
+
+### Estado Atual da Cobertura
+
+O projeto conta com **36 suítes de teste e 215 testes**, cobrindo as principais camadas da aplicação:
+
+- **Repositories**: testes com Prisma mockado para todos os módulos (orders, products, users, products-sync-control)
+- **Services**: lógica de negócio (orders, products, auth, shopee, shops, etc.)
+- **Processors** (BullMQ): `mail.processor` e `products-sync.processor`
+- **Producers** (BullMQ): `mail.producer` e `products-sync.producer`
+- **Controllers**: validação de rotas HTTP
+
+A cobertura de código é de aproximadamente **84% de statements / 85% de lines**, com variação em branch e functions.
 
 ---
 
@@ -569,6 +626,7 @@ O projeto implementa múltiplas camadas de segurança:
 4. **Password Hashing**: bcrypt com 12 rounds de salt
 5. **Email Tokens**: Tokens hash com SHA256
 6. **Validation Pipes**: Validação global de payloads de requisição
+7. **Rate Limiting**: Limitação de requisições via `RateLimitModule` (serviço global) para proteção contra abuso
 
 ---
 
