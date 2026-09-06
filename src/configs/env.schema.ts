@@ -50,6 +50,7 @@ export const envSchema = z.object({
   GET_ITEM_BASE_INFO_PATH: z.string().min(1),
   GET_ORDER_LIST_PATH: z.string().min(1),
   GET_ORDER_DETAIL_PATH: z.string().min(1),
+  GET_ESCROW_DETAIL_BATCH_PATH: z.string().min(1),
 });
 
 const parsed = envSchema.safeParse(process.env);
