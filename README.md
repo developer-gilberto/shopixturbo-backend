@@ -63,8 +63,9 @@ ShopixTurbo Backend é uma API RESTful desenvolvida com NestJS para integração
 - **Autenticação de Usuários**: Registro, login com JWT e verificação de e-mail
 - **Gestão de Usuários**: CRUD completo com proteção por roles
 - **Integração Shopee**: Autorização de loja, gerenciamento de tokens, consulta de informações
-- **Gestão de Produtos**: Listagem, informações detalhadas e sincronização com a Shopee
-- **Gestão de Pedidos**: Consulta de pedidos (em desenvolvimento)
+- **Gestão de Produtos**: Listagem, informações detalhadas, sincronização e cadastro de preço de custo/impostos com a Shopee
+- **Gestão de Pedidos**: Consulta de pedidos e detalhes de pagamento/escrow (get_escrow_detail_batch)
+- **Relatório de Custos e Lucros**: Cruzamento dos dados financeiros da Shopee com o preço de custo e impostos do governo armazenados no catálogo interno, gerando relatório completo de receita, custo, lucro líquido e margem por pedido/item
 - **Envio de E-mails**: Sistema de filas com BullMQ para envio assíncrono
 - **Documentação API**: Swagger/OpenAPI integrado com autenticação
 - **Validação de Dados**: Pipes globais de validação com class-validator
@@ -130,6 +131,9 @@ shopixturbo-backend/
 │   │   ├── users/                  # Módulo de usuários
 │   │   ├── mail/                   # Módulo de e-mail (BullMQ)
 │   │   ├── shops/                  # Módulo de lojas (Shopee)
+│   │   ├── orders/                 # Módulo de pedidos (listagem e detalhes)
+│   │   ├── products/               # Módulo de produtos (custo e impostos)
+│   │   ├── orders-report/          # Relatório de custos e lucros dos pedidos
 │   │   └── integrations/           # Módulo de integrações
 │   └── generated/                  # Cliente Prisma gerado
 ├── test/                           # Testes E2E
@@ -252,6 +256,7 @@ GET_ITEM_LIST_PATH=/api/v2/product/get_item_list
 GET_ITEM_BASE_INFO_PATH=/api/v2/product/get_item_base_info
 GET_ORDER_LIST_PATH=/api/v2/order/get_order_list
 GET_ORDER_DETAIL_PATH=/api/v2/order/get_order_detail
+GET_ESCROW_DETAIL_BATCH_PATH=/api/v2/payment/get_escrow_detail_batch
 ```
 
 ### Descrição das Variáveis
@@ -300,6 +305,7 @@ GET_ORDER_DETAIL_PATH=/api/v2/order/get_order_detail
 | `GET_ITEM_BASE_INFO_PATH`  | Path para obter info base de produtos                      | -                        |
 | `GET_ORDER_LIST_PATH`      | Path para listar pedidos                                   | -                        |
 | `GET_ORDER_DETAIL_PATH`    | Path para obter detalhe de pedido                          | -                        |
+| `GET_ESCROW_DETAIL_BATCH_PATH` | Path para obter detalhes de pagamento/escrow em lote   | -                        |
 
 ---
 
@@ -386,6 +392,22 @@ http://localhost:8000/api/v1/docs
 | Método | Endpoint | Descrição | Auth      |
 | ------ | -------- | --------- | --------- |
 | -      | -        | Em desenvolvimento | Sim (JWT) |
+
+#### Relatórios (`/api/v1/report`)
+
+| Método | Endpoint                                              | Descrição                                  | Auth      |
+| ------ | ----------------------------------------------------- | ------------------------------------------ | --------- |
+| GET    | `/report/orders/:shop_id`                             | Relatório completo de custos e lucros dos pedidos (usa `get_escrow_detail_batch` da Shopee + preço de custo/impostos do catálogo interno) | Sim (JWT) |
+| GET    | `/report/orders/payment/escrow_detail_batch/:shop_id` | Detalhes de pagamento/escrow em lote da Shopee para os pedidos informados | Sim (JWT) |
+
+O relatório de custos e lucros (`GET /report/orders/:shop_id`) entrega, por pedido e por item:
+- O **resumo** (`summary`) agrega 4 pedidos com: receita total (`total_revenue`), frete (`total_shipping`), comissão da Shopee (`total_shopee_commission`), custo de aquisição dos itens (`total_items_cost`), impostos (`total_government_taxes`), custo total (`total_cost`), lucro líquido (`total_net_profit`) e margem geral (`overall_margin_percent`).
+- **Receita** (`total_amount`, `shipping_paid_by_seller`, `unit_price`, `revenue`): `total_amount` é a soma de `unit_price × quantity` dos itens (sem frete); demais campos vêm dos dados financeiros da Shopee.
+- **Frete pago pelo vendedor** (`shipping_paid_by_seller`) calculado como `actual_shipping_fee - buyer_paid_shipping_fee - shopee_shipping_rebate - shipping_fee_discount_from_3pl`.
+- **Comissão da Shopee** (`shopee_commission`) vinda de `commission_fee` dos dados financeiros da Shopee.
+- **Custo dos itens** (`items_cost`) = soma de `unit_cost × quantity` (sem impostos, sem frete) obtidos do catálogo interno; `total_cost` = `items_cost` + `total_government_taxes` + `shipping_paid_by_seller`. Impostos do governo: `unit_government_taxes` unitário e `total_government_taxes` por item no pedido (campos `cost_price_cents` e `government_taxes` do catálogo).
+- **Lucro líquido** (`net_profit_margin`) e **margem** (`margin_percent` em percentual, `net_profit_margin` em dinheiro) calculados pela diferença entre receita e custo.
+- Flags de integridade: `is_matched_to_product`, `has_partial_cost_data`, `orders_with_missing_cost_data` e `unmatched_item_skus` para sinalizar itens sem custo cadastrado ou não encontrados no catálogo.
 
 ### Exemplo de Uso
 
