@@ -238,6 +238,14 @@ export class OrdersReportSummaryDTO {
   orders_with_missing_cost_data: string[];
 
   @ApiProperty({
+    type: () => [Number],
+    example: [885178163, 885178164],
+    description:
+      'Lista de item_id dos produtos que não possuem cost_price ou government_taxes cadastrados, impossibilitando o cálculo de custo e lucro desses itens.',
+  })
+  products_with_missing_cost_data: number[];
+
+  @ApiProperty({
     example: ['luminaria-sku'],
     description:
       'Lista de SKUs de itens que não foram encontrados no catálogo interno de produtos. Esses itens não possuem cost_price nem government_taxes.',

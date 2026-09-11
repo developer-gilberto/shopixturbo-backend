@@ -112,6 +112,7 @@ export class OrdersReportService {
           summary.totalNetProfitCents !== null ? this.calculator.fromCents(summary.totalNetProfitCents) : null,
         overall_margin_percent: summary.overallMarginPercent,
         orders_with_missing_cost_data: summary.ordersWithMissingCostData,
+        products_with_missing_cost_data: summary.productsWithMissingCostData,
         unmatched_item_skus: summary.unmatchedItemSkus,
       },
     };

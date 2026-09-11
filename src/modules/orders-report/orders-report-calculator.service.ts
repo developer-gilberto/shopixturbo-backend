@@ -281,6 +281,7 @@ export class OrdersReportCalculator {
     let totalGovernmentTaxesCents = 0;
     let canSumCosts = true;
     const ordersWithMissingCostData: string[] = [];
+    const productsWithMissingCostData = new Set<number>();
     const unmatchedSkus = new Set<string>();
 
     for (const result of orderResults) {
@@ -301,6 +302,10 @@ export class OrdersReportCalculator {
         if (!item.isMatchedToProduct) {
           unmatchedSkus.add(item.sku);
         }
+
+        if (item.unitCostCents === null || item.unitGovernmentTaxesCents === null) {
+          productsWithMissingCostData.add(item.itemId);
+        }
       }
     }
 
@@ -320,6 +325,7 @@ export class OrdersReportCalculator {
       totalNetProfitCents,
       overallMarginPercent,
       ordersWithMissingCostData,
+      productsWithMissingCostData: [...productsWithMissingCostData],
       unmatchedItemSkus: [...unmatchedSkus],
     };
   }

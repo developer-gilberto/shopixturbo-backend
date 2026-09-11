@@ -53,6 +53,7 @@ export interface SummaryResult {
   totalNetProfitCents: number | null;
   overallMarginPercent: number | null;
   ordersWithMissingCostData: string[];
+  productsWithMissingCostData: number[];
   unmatchedItemSkus: string[];
 }
 
