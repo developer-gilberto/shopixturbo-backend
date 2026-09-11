@@ -181,6 +181,7 @@ describe('OrdersReportCalculator', () => {
       expect(summary.totalShippingCents).toBe(0);
       expect(summary.totalCostCents).toBeNull();
       expect(summary.ordersWithMissingCostData).toEqual(['260830NDGSTMP6']);
+      expect(summary.productsWithMissingCostData).toEqual([885178163, 885178164]);
     });
 
     it('soma unit_price × quantity dos itens como total_amount', () => {
@@ -409,6 +410,7 @@ describe('OrdersReportCalculator', () => {
       expect(summary.totalNetProfitCents).toBe(5889 - 2850);
       expect(summary.overallMarginPercent).toBeCloseTo(((5889 - 2850) / 5889) * 100, 5);
       expect(summary.ordersWithMissingCostData).toEqual([]);
+      expect(summary.productsWithMissingCostData).toEqual([]);
       expect(summary.unmatchedItemSkus).toEqual([]);
     });
 
@@ -442,6 +444,7 @@ describe('OrdersReportCalculator', () => {
       expect(summary.totalNetProfitCents).toBeNull();
       expect(summary.overallMarginPercent).toBeNull();
       expect(summary.ordersWithMissingCostData).toEqual(['OUTRO-PEDIDO']);
+      expect(summary.productsWithMissingCostData).toEqual([999999]);
     });
 
     it('coleta skus não correspondidos no resumo', () => {
@@ -452,6 +455,7 @@ describe('OrdersReportCalculator', () => {
 
       expect(summary.unmatchedItemSkus).toEqual(['mouse-sku', 'lanterna-sku']);
       expect(summary.ordersWithMissingCostData).toEqual(['SEM-PRODUTO']);
+      expect(summary.productsWithMissingCostData).toEqual([885178163, 885178164]);
     });
   });
 

@@ -268,7 +268,7 @@ describe('ProductsRepository', () => {
       );
     });
 
-    it('deve filtrar por id, shop_id e deleted_at null', async () => {
+    it('deve filtrar por external_id, shop_id e deleted_at null', async () => {
       prisma.$transaction.mockResolvedValue([{ count: 1 }]);
 
       const products = [{ id: 'p1', cost_price_cents: 2500, government_taxes: 500 }];
@@ -278,7 +278,7 @@ describe('ProductsRepository', () => {
       expect(prisma.product.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
-            id: 'p1',
+            external_id: 'p1',
             shop_id: 'shop-1',
             deleted_at: null,
           },

@@ -219,6 +219,8 @@ describe('OrdersReportService', () => {
       expect(result.summary.total_cost).toBeCloseTo(28.5, 2);
       expect(result.summary.total_net_profit).toBeCloseTo(30.39, 2);
       expect(result.summary.unmatched_item_skus).toEqual([]);
+      expect(result.summary.products_with_missing_cost_data).toEqual([]);
+      expect(result.summary.orders_with_missing_cost_data).toEqual([]);
     });
 
     it('lança NotFoundException quando não há pedidos na lista', async () => {

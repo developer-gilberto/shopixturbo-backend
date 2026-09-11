@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
 import { MailProducer } from '../mail/mail.producer';
+import { ShopsService } from '../shops/shops.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { VerifyEmailStatus } from './verify-email-status.enum';
@@ -49,6 +50,10 @@ describe('AuthService', () => {
           },
         },
         { provide: MailProducer, useValue: { sendVerificationEmail: jest.fn() } },
+        {
+          provide: ShopsService,
+          useValue: { getShopByUserId: jest.fn().mockResolvedValue([{ id: 'shop-1' }]) },
+        },
       ],
     }).compile();
 

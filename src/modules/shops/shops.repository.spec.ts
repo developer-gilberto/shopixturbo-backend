@@ -136,6 +136,7 @@ describe('ShopsRepository', () => {
       await expect(repository.getShopByUserId('user-1')).resolves.toEqual([{ id: 'shop-1' }]);
       expect(prisma.shop.findMany).toHaveBeenCalledWith({
         where: { user_id: 'user-1', deleted_at: null },
+        omit: { external_id: true },
       });
     });
 
