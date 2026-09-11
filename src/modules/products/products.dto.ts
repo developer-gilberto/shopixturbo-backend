@@ -214,7 +214,7 @@ export class ProductsFullResponseDTO {
 
 export class UpdateProductCostAndTaxesDTO {
   @ApiProperty({
-    example: 'a4f88155-5963-43d6-9cf1-492b8a7ac9hj',
+    example: '885178164',
     format: 'uuid',
     description: 'ID do produto',
   })

@@ -137,7 +137,7 @@ export class ProductsRepository {
     const operations = products.map((product) =>
       this.prismaClient.product.updateMany({
         where: {
-          id: product.id,
+          external_id: product.id,
           shop_id: shopId,
           deleted_at: null,
         },
