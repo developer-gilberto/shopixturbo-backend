@@ -9,6 +9,7 @@ import { MailProducer } from '../mail/mail.producer';
 import { UsersService } from '../users/users.service';
 import { SignInDTO, SignUpDTO } from './auth.dto';
 import { VerifyEmailStatus } from './verify-email-status.enum';
+import { ShopsService } from '../shops/shops.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly userService: UsersService,
     private readonly mailProducer: MailProducer,
+    private readonly shopsService: ShopsService,
   ) {}
 
   async signup(data: SignUpDTO) {
@@ -119,12 +121,15 @@ export class AuthService {
       throw new ForbiddenException('É necessário verificar seu email para fazer login.');
     }
 
+    const [shop] = await this.shopsService.getShopByUserId(storedUser.id)
+
     const payload = {
       id: storedUser.id,
       name: storedUser.name,
       email: storedUser.email,
       role: storedUser.role,
       is_email_verified: storedUser.is_email_verified,
+      shop
     };
 
     const token = this.jwtService.sign<TokenPayload>(payload);

@@ -154,4 +154,8 @@ export class ShopsService {
   async getShopByIdWithTokenInclude(shopId: string) {
     return await this.shopRepository.getShopByIdWithTokenInclude(shopId);
   }
+
+  async getShopByUserId(userId: string) {
+    return await this.shopRepository.getShopByUserId(userId);
+  }
 }
