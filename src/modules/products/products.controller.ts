@@ -10,6 +10,8 @@ import {
   GetProductInfoDTO,
   GetProductListQueryDTO,
   GetProductListResponseDTO,
+  GetSpecificProductQueryDTO,
+  ProductResponseDTO,
   ProductsFullResponseDTO,
   ProductsUpdateCostAndTaxesDTO,
   ProductsUpdateCostAndTaxesResponseDTO,
@@ -75,6 +77,20 @@ export class ProductsController {
     @Query() pagination: GetProductFullDTO,
   ) {
     return await this.productService.getProductsFull(user.id, data.shop_id, pagination);
+  }
+
+  @Get(':shop_id')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ProductResponseDTO,
+    description: 'Retorna os dados de um produto específico da loja',
+  })
+  async getSpecificProductById(
+    @CurrentUser() user: TokenPayload,
+    @Param() param: GetShopDTO,
+    @Query() query: GetSpecificProductQueryDTO,
+  ) {
+    return await this.productService.getSpecificProductById(user.id, param.shop_id, query.product_id);
   }
 
   @Patch('cost-taxes/:shop_id')

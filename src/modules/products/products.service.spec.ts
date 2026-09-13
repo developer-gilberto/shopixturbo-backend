@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException } from '@nestjs/common';
+import { BadRequestException, HttpException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ShopeeAuthService } from '../integrations/shopee/auth/shopee-auth.service';
@@ -47,6 +47,7 @@ describe('ProductsService', () => {
             getProductsFull: jest.fn(),
             updateCostAndTaxes: jest.fn(),
             getEspecificProductsByIds: jest.fn(),
+            getSpecificProductById: jest.fn(),
           },
         },
       ],
@@ -212,6 +213,25 @@ describe('ProductsService', () => {
 
       expect(productsRepo.getEspecificProductsByIds).toHaveBeenCalledWith('s1', ['1', '2']);
       expect(result).toEqual(['a']);
+    });
+  });
+
+  describe('getSpecificProductById', () => {
+    it('delega ao repositório e retorna o product encontrado', async () => {
+      const mockProduct = { id: 'p1', external_id: '100' };
+      productsRepo.getSpecificProductById.mockResolvedValue(mockProduct as never);
+
+      const result = await service.getSpecificProductById('u1', 's1', '100');
+
+      expect(productsRepo.getSpecificProductById).toHaveBeenCalledWith('s1', '100');
+      expect(result).toEqual(mockProduct);
+    });
+
+    it('lança NotFoundException quando o product não é encontrado', async () => {
+      productsRepo.getSpecificProductById.mockResolvedValue(null as never);
+
+      await expect(service.getSpecificProductById('u1', 's1', '999')).rejects.toThrow(NotFoundException);
+      expect(productsRepo.getSpecificProductById).toHaveBeenCalledWith('s1', '999');
     });
   });
 });

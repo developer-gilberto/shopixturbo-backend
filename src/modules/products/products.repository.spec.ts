@@ -13,6 +13,7 @@ describe('ProductsRepository', () => {
     product: {
       upsert: jest.Mock;
       findMany: jest.Mock;
+      findFirst: jest.Mock;
       count: jest.Mock;
       updateMany: jest.Mock;
     };
@@ -25,6 +26,7 @@ describe('ProductsRepository', () => {
       product: {
         upsert: jest.fn(),
         findMany: jest.fn(),
+        findFirst: jest.fn(),
         count: jest.fn(),
         updateMany: jest.fn(),
       },
@@ -307,6 +309,46 @@ describe('ProductsRepository', () => {
       const result = await repository.getEspecificProductsByIds('shop-1', ['999']);
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getSpecificProductById', () => {
+    it('deve buscar o product pelo external_id', async () => {
+      const mockProduct = { id: 'p1', external_id: '100' };
+      prisma.product.findFirst.mockResolvedValue(mockProduct);
+
+      const result = await repository.getSpecificProductById('shop-1', '100');
+
+      expect(result).toEqual(mockProduct);
+      expect(prisma.product.findFirst).toHaveBeenCalledWith({
+        where: {
+          shop_id: 'shop-1',
+          OR: [{ id: '100' }, { external_id: '100' }],
+        },
+      });
+    });
+
+    it('deve buscar o product pelo id interno (UUID)', async () => {
+      const mockProduct = { id: 'p1', external_id: '100' };
+      prisma.product.findFirst.mockResolvedValue(mockProduct);
+
+      const result = await repository.getSpecificProductById('shop-1', 'p1');
+
+      expect(result).toEqual(mockProduct);
+      expect(prisma.product.findFirst).toHaveBeenCalledWith({
+        where: {
+          shop_id: 'shop-1',
+          OR: [{ id: 'p1' }, { external_id: 'p1' }],
+        },
+      });
+    });
+
+    it('deve retornar null quando o product não é encontrado', async () => {
+      prisma.product.findFirst.mockResolvedValue(null);
+
+      const result = await repository.getSpecificProductById('shop-1', '999');
+
+      expect(result).toBeNull();
     });
   });
 });

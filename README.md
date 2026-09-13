@@ -387,6 +387,7 @@ Todos os endpoints possuem **descrições** e **exemplos de request/response** (
 | GET    | `/products/list/:shop_id`      | Listar produtos da loja com paginação e filtros    | Sim (JWT) |
 | GET    | `/products/info/:shop_id`      | Obter informações detalhadas dos produtos Shopee   | Sim (JWT) |
 | GET    | `/products/full/:shop_id`      | Obter produtos completos do catálogo interno       | Sim (JWT) |
+| GET    | `/products/:shop_id`           | Obter dados de um produto específico (`?product_id=`) | Sim (JWT) |
 | PATCH  | `/products/cost-taxes/:shop_id` | Atualizar custo e impostos de um lote de produtos | Sim (JWT) |
 
 #### Sincronização (`/api/v1/sync/products`)

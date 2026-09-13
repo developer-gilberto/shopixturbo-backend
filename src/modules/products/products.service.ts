@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { constants } from 'src/configs/constants.config';
 import { Env } from 'src/configs/env.schema';
@@ -124,5 +124,13 @@ export class ProductsService {
 
   async getEspecificProductsByIds(_userId: string, shopId: string, productsIds: string[]) {
     return this.productsRepo.getEspecificProductsByIds(shopId, productsIds);
+  }
+
+  async getSpecificProductById(_userId: string, shopId: string, productId: string) {
+    const product = await this.productsRepo.getSpecificProductById(shopId, productId);
+
+    if (!product) throw new NotFoundException(`Produto ${productId} não encontrado`);
+
+    return product;
   }
 }

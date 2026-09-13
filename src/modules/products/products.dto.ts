@@ -1,6 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { ArrayMaxSize, ArrayNotEmpty, IsArray, IsEnum, IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayNotEmpty,
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import { ItemStatus } from './products.enum';
 
 export class GetProductListQueryDTO {
@@ -103,6 +115,17 @@ export class GetProductInfoDTO {
   @IsInt({ each: true, message: 'Todos os item_id devem ser números inteiros.' })
   @Min(1, { each: true, message: 'Todos os item_id devem ser maiores que 0.' })
   item_id_list: number[];
+}
+
+export class GetSpecificProductQueryDTO {
+  @ApiProperty({
+    example: '885178156',
+    description: 'ID do produto (ID interno UUID ou external_id da Shopee)',
+  })
+  @IsNotEmpty({ message: 'O ID do produto é obrigatório' })
+  @IsString({ message: 'O ID do produto deve ser uma string' })
+  @Transform(({ value }) => value?.trim())
+  product_id: string;
 }
 
 export class GetProductFullDTO {

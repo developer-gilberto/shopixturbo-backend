@@ -161,4 +161,13 @@ export class ProductsRepository {
       orderBy: { updated_at: 'desc' },
     });
   }
+
+  async getSpecificProductById(shopId: string, productId: string) {
+    return this.prismaClient.product.findFirst({
+      where: {
+        shop_id: shopId,
+        OR: [{ id: productId }, { external_id: productId }],
+      },
+    });
+  }
 }
