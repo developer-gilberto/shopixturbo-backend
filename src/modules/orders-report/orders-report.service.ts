@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/configs/env.schema';
 import { ShopeeAuthService } from '../integrations/shopee/auth/shopee-auth.service';
@@ -142,8 +142,13 @@ export class OrdersReportService {
       });
     }
 
-    const ordersEscrowDetails: { response: EscrowDetailBatchResponse[] } = await response.json();
+    const ordersEscrowDetails: { response?: EscrowDetailBatchResponse[]; error?: string; message?: string; } = await response.json();
 
-    return ordersEscrowDetails.response.map((entry) => entry.escrow_detail);
+    if (ordersEscrowDetails.error) {
+      this.logger.error('API Shopee: falha ao buscar detalhes do pagamento do pedido. \n', `API Shopee respondeu: ${ordersEscrowDetails.error} \n ${ordersEscrowDetails.message}`);
+      throw new HttpException(`API Shopee: ${ordersEscrowDetails.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return ordersEscrowDetails.response!.map((entry) => entry.escrow_detail);
   }
 }
