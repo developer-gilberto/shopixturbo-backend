@@ -47,7 +47,7 @@ export class AuthService {
     await this.mailProducer.sendVerificationEmail(data.email, rawToken);
 
     return {
-      message: `Enviamos um email para '${data.email}'. Verifique sua caixa de entrada para ativar sua conta.`,
+      message: `Enviamos um email para '${data.email}'. Verifique sua caixa de entrada para ativar sua conta. Caso não receba na caixa de entrada, verifique sua caixa de spam.`,
     };
   }
 

@@ -28,11 +28,16 @@ export const envSchema = z.object({
   REDIS_HOST: z.string().min(1),
   REDIS_PORT: z.coerce.number().int().min(1),
 
-  // SMTP
+  // SMTP (fallback local/Mailpit) — usado quando MAILTRAP_TOKEN não está definido
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.coerce.number().int().min(1),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
+
+  // Serviço de Email
+  MAILTRAP_TOKEN: z.string().optional(),
+  MAIL_FROM: z.string().optional(),
+  MAIL_FROM_NAME: z.string().optional(),
 
   // Shopee auth
   SHOPEE_PARTNER_ID: z.coerce.number().int().min(1),

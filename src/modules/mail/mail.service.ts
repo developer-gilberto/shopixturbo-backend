@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { MailtrapTransport } from 'mailtrap';
 import * as nodemailer from 'nodemailer';
 import { constants } from 'src/configs/constants.config';
 import { Env } from 'src/configs/env.schema';
@@ -16,17 +17,34 @@ export class MailService implements OnModuleInit {
   private readonly smtpHost: string;
   private readonly smtpPort: number;
   private readonly smtpPass: string;
+  private readonly mailFrom: string;
+  private readonly mailFromName: string;
+  private readonly mailtrapToken: string;
+  private readonly isMailtrap: boolean;
   private readonly isProd: boolean;
 
   constructor(private readonly configService: ConfigService<Env>) {
     this.baseApiUrl = this.configService.getOrThrow<string>('BASE_API_URL');
+    this.mailFrom = this.configService.getOrThrow<string>('MAIL_FROM');
+    this.mailFromName = this.configService.get<string>('MAIL_FROM_NAME') ?? constants.APPLICATION_NAME;
+    this.mailtrapToken = this.configService.get<string>('MAILTRAP_TOKEN') ?? '';
+    this.isMailtrap = this.mailtrapToken.length > 0;
+    this.isProd = this.configService.getOrThrow<string>('NODE_ENV') === 'production';
+
     this.smtpUser = this.configService.getOrThrow<string>('SMTP_USER');
     this.smtpHost = this.configService.getOrThrow<string>('SMTP_HOST');
     this.smtpPort = this.configService.getOrThrow<number>('SMTP_PORT');
     this.smtpPass = this.configService.getOrThrow<string>('SMTP_PASS');
-    this.isProd = this.configService.getOrThrow<string>('NODE_ENV') === 'production';
 
-    this.transporter = nodemailer.createTransport({
+    this.transporter = this.createTransporter();
+  }
+
+  private createTransporter(): nodemailer.Transporter {
+    if (this.isMailtrap) {
+      return nodemailer.createTransport(MailtrapTransport({ token: this.mailtrapToken }));
+    }
+
+    return nodemailer.createTransport({
       host: this.smtpHost,
       port: this.smtpPort,
       secure: this.smtpPort === 465,
@@ -38,6 +56,11 @@ export class MailService implements OnModuleInit {
   }
 
   async onModuleInit() {
+    if (this.isMailtrap) {
+      this.logger.log('Serviço de email configurado com Mailtrap (API)');
+      return;
+    }
+
     try {
       await this.transporter.verify();
       this.logger.log(
@@ -59,7 +82,7 @@ export class MailService implements OnModuleInit {
     });
 
     await this.transporter.sendMail({
-      from: `${constants.APPLICATION_NAME} <${this.smtpUser}>`,
+      from: `${this.mailFromName} <${this.mailFrom}>`,
       to,
       subject: `${constants.APPLICATION_NAME} - Confirme seu email.`,
       html: htmlEmailVerification,
