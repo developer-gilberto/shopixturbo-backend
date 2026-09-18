@@ -184,7 +184,7 @@ describe('OrdersReportCalculator', () => {
       expect(summary.productsWithMissingCostData).toEqual([885178163, 885178164]);
     });
 
-    it('soma unit_price × quantity dos itens como total_amount', () => {
+    it('trata discounted_price do escrow como subtotal da linha (não multiplica pela quantidade)', () => {
       const detail = escrowDetail({
         order_income: {
           ...escrowDetail().order_income,
@@ -215,7 +215,11 @@ describe('OrdersReportCalculator', () => {
 
       const result = calculator.calculateOrdersFromEscrow([detail], [])[0];
 
-      expect(result.totalAmountCents).toBe(16359);
+      expect(result.totalAmountCents).toBe(9379);
+      expect(result.itemsBreakdown[0].quantity).toBe(2);
+      expect(result.itemsBreakdown[0].revenueCents).toBe(6980);
+      expect(result.itemsBreakdown[0].unitPriceCents).toBe(3490);
+      expect(result.itemsBreakdown[1].unitPriceCents).toBe(2399);
     });
 
     it('calcula custos e lucros quando produtos possuem cost_price e government_taxes', () => {
@@ -358,6 +362,7 @@ describe('OrdersReportCalculator', () => {
     });
 
     it('multiplica custos e impostos pela quantidade comprada de um item', () => {
+      // discounted_price é o subtotal da linha (34.9 × 2 = 69.8) conforme API do escrow
       const detail = escrowDetail({
         order_income: {
           ...escrowDetail().order_income,
@@ -368,9 +373,9 @@ describe('OrdersReportCalculator', () => {
               item_sku: 'mouse-sku',
               model_sku: '',
               quantity_purchased: 2,
-              discounted_price: 34.9,
-              selling_price: 34.9,
-              original_price: 34.9,
+              discounted_price: 69.8,
+              selling_price: 69.8,
+              original_price: 69.8,
             },
           ],
         },
@@ -380,6 +385,8 @@ describe('OrdersReportCalculator', () => {
 
       const result = calculator.calculateOrdersFromEscrow([detail], products)[0];
 
+      // preço unitário = subtotal da linha ÷ quantidade
+      expect(result.itemsBreakdown[0].unitPriceCents).toBe(3490);
       // imposto do governo e custo unitário são por unidade → multiplicar pela quantidade
       expect(result.itemsBreakdown[0].unitGovernmentTaxesCents).toBe(200);
       expect(result.itemsBreakdown[0].itemGovernmentTaxesCents).toBe(400);

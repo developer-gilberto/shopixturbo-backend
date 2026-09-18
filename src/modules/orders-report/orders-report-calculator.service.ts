@@ -207,8 +207,9 @@ export class OrdersReportCalculator {
     for (const item of detail.order_income.items) {
       const product = index.get(String(item.item_id));
       const qty = item.quantity_purchased;
-      const unitPriceCents = this.toCents(item.discounted_price);
-      const revenueCents = unitPriceCents * qty;
+      const linePriceCents = this.toCents(item.discounted_price);
+      const unitPriceCents = qty > 0 ? Math.round(linePriceCents / qty) : linePriceCents;
+      const revenueCents = linePriceCents;
       productRevenueCents += revenueCents;
 
       const unitCostCents = product?.cost_price_cents ?? null;
