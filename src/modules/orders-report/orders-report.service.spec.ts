@@ -27,6 +27,8 @@ describe('OrdersReportService', () => {
   };
 
   const ordersList = {
+    more: true,
+    next_cursor: '3',
     order_list: [
       {
         order_sn: '260830NDGSTMP6',
@@ -221,6 +223,8 @@ describe('OrdersReportService', () => {
       expect(result.summary.unmatched_item_skus).toEqual([]);
       expect(result.summary.products_with_missing_cost_data).toEqual([]);
       expect(result.summary.orders_with_missing_cost_data).toEqual([]);
+
+      expect(result.pagination).toEqual({ more: true, next_cursor: '3' });
     });
 
     it('lança NotFoundException quando não há pedidos na lista', async () => {

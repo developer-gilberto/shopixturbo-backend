@@ -33,7 +33,7 @@ export class OrdersService {
 
     const { timestampFrom, timestampTo } = getTimeRange(data.interval_days);
 
-    const url = `${signedUrl}&offset=${data.offset}&page_size=${data.page_size}&time_range_field=${data.time_range_field}&time_from=${timestampFrom}&time_to=${timestampTo}&order_status=${data.order_status}`;
+    const url = `${signedUrl}&page_size=${data.page_size}&time_range_field=${data.time_range_field}&time_from=${timestampFrom}&time_to=${timestampTo}&order_status=${data.order_status}&cursor=${data.cursor ? encodeURIComponent(data.cursor) : ''}`;
 
     const encodeUrl = encodeURI(url);
 

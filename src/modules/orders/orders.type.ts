@@ -10,6 +10,7 @@ export interface GetOrderList {
   time_to?: number;
   time_range_field: TimeRangeField;
   order_status: OrderStatus;
+  cursor?: string;
   response_optional_fields?: string;
   logistics_channel_id?: number;
 }

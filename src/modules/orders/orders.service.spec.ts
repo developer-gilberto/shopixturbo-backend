@@ -100,18 +100,31 @@ describe('OrdersService', () => {
       await expect(service.getOrderList(orderListData)).rejects.toThrow(HttpException);
     });
 
-    it('deve incluir offset e page_size na URL', async () => {
+    it('deve incluir cursor e page_size na URL', async () => {
       const mockResponse = {
         ok: true,
         json: jest.fn().mockResolvedValue({ response: {} }),
       };
       jest.spyOn(global, 'fetch').mockResolvedValue(mockResponse as never);
 
-      await service.getOrderList({ ...orderListData, offset: 10, page_size: 50 });
+      await service.getOrderList({ ...orderListData, page_size: 50 });
 
       const fetchCall = (global.fetch as jest.Mock).mock.calls[0][0] as string;
-      expect(fetchCall).toContain('offset=10');
+      expect(fetchCall).toContain('cursor=');
       expect(fetchCall).toContain('page_size=50');
+    });
+
+    it('deve enviar o cursor para a API da Shopee quando fornecido', async () => {
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({ response: {} }),
+      };
+      jest.spyOn(global, 'fetch').mockResolvedValue(mockResponse as never);
+
+      await service.getOrderList({ ...orderListData, cursor: '9' });
+
+      const fetchCall = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+      expect(fetchCall).toContain('cursor=9');
     });
 
     it('deve incluir order_status na URL', async () => {

@@ -1,6 +1,17 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { ArrayMaxSize, ArrayNotEmpty, IsArray, IsEnum, IsInt, IsString, Max, Min, MinLength } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayNotEmpty,
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { OrderStatus, TimeRangeField } from './orders.enum';
 
 export class OrdersListDTO {
@@ -16,6 +27,15 @@ export class OrdersListDTO {
   @Max(100)
   @Transform(({ value }) => Number(value))
   page_size: number;
+
+  @ApiPropertyOptional({
+    example: '3',
+    description:
+      'Cursor da próxima página (valor de pagination.next_cursor da resposta anterior). Enviado à API da Shopee como cursor.',
+  })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
 
   @ApiProperty({ enum: OrderStatus, example: OrderStatus.READY_TO_SHIP, description: 'Filtrar por status do pedido' })
   @IsEnum(OrderStatus)

@@ -29,7 +29,7 @@ export class OrderItemBreakdownDTO {
 
   @ApiProperty({
     example: 10.0,
-    description: 'Preço unitário de venda do item. (model_discounted_price da Shopee)',
+    description: 'Preço unitário de venda do item. (discounted_price do escrow ÷ quantity quando quantidade > 1)',
   })
   unit_price: number;
 
@@ -253,6 +253,21 @@ export class OrdersReportSummaryDTO {
   unmatched_item_skus: string[];
 }
 
+export class OrdersReportPaginationDTO {
+  @ApiProperty({
+    example: true,
+    description: 'Indica se existem mais páginas de pedidos a buscar.',
+  })
+  more: boolean;
+
+  @ApiPropertyOptional({
+    example: '3',
+    description:
+      'Cursor para a próxima página de pedidos. Deve ser enviado como offset na próxima chamada (ou a próxima chamada de paginação). Null quando não há mais páginas.',
+  })
+  next_cursor: string | null;
+}
+
 export class OrdersReportResponseDTO {
   @ApiProperty({
     type: () => [OrderReportItemDTO],
@@ -265,6 +280,12 @@ export class OrdersReportResponseDTO {
     description: 'Totalizadores gerais de todos os pedidos do relatório.',
   })
   summary: OrdersReportSummaryDTO;
+
+  @ApiProperty({
+    type: () => OrdersReportPaginationDTO,
+    description: 'Detalhes da paginação retornados pela API de lista de pedidos da Shopee.',
+  })
+  pagination: OrdersReportPaginationDTO;
 }
 
 // ─── Resposta da API Shopee: get_escrow_detail_batch ─────
@@ -286,7 +307,7 @@ export class EscrowDetailItemDTO {
   @ApiProperty({ example: 1, description: 'Quantidade comprada do item.' })
   quantity_purchased: number;
 
-  @ApiProperty({ example: 69.8, description: 'Preço com desconto aplicado ao comprador.' })
+  @ApiProperty({ example: 69.8, description: 'Preço com desconto aplicado ao comprador (somatório da linha quando quantidade > 1).' })
   discounted_price: number;
 
   @ApiProperty({ example: 69.8, description: 'Preço de venda do item.' })

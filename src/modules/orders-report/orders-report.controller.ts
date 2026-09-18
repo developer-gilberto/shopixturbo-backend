@@ -29,6 +29,7 @@ export class OrdersReportController {
       interval_days: query.interval_days,
       order_status: query.order_status,
       time_range_field: query.time_range_field,
+      cursor: query.cursor,
     });
   }
 

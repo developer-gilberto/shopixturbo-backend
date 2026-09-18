@@ -115,6 +115,10 @@ export class OrdersReportService {
         products_with_missing_cost_data: summary.productsWithMissingCostData,
         unmatched_item_skus: summary.unmatchedItemSkus,
       },
+      pagination: {
+        more: ordersList.more,
+        next_cursor: ordersList.next_cursor,
+      },
     };
   }
 
@@ -142,10 +146,14 @@ export class OrdersReportService {
       });
     }
 
-    const ordersEscrowDetails: { response?: EscrowDetailBatchResponse[]; error?: string; message?: string; } = await response.json();
+    const ordersEscrowDetails: { response?: EscrowDetailBatchResponse[]; error?: string; message?: string } =
+      await response.json();
 
     if (ordersEscrowDetails.error) {
-      this.logger.error('API Shopee: falha ao buscar detalhes do pagamento do pedido. \n', `API Shopee respondeu: ${ordersEscrowDetails.error} \n ${ordersEscrowDetails.message}`);
+      this.logger.error(
+        'API Shopee: falha ao buscar detalhes do pagamento do pedido. \n',
+        `API Shopee respondeu: ${ordersEscrowDetails.error} \n ${ordersEscrowDetails.message}`,
+      );
       throw new HttpException(`API Shopee: ${ordersEscrowDetails.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
