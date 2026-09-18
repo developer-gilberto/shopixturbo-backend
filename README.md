@@ -66,7 +66,7 @@ ShopixTurbo Backend é uma API RESTful desenvolvida com NestJS para integração
 - **Gestão de Produtos**: Listagem, informações detalhadas, sincronização e cadastro de preço de custo/impostos com a Shopee
 - **Gestão de Pedidos**: Consulta de pedidos e detalhes de pagamento/escrow (get_escrow_detail_batch)
 - **Relatório de Custos e Lucros**: Cruzamento dos dados financeiros da Shopee com o preço de custo e impostos do governo armazenados no catálogo interno, gerando relatório completo de receita, custo, lucro líquido e margem por pedido/item
-- **Envio de E-mails**: Sistema de filas com BullMQ para envio assíncrono
+- **Envio de E-mails**: Sistema de filas com BullMQ para envio assíncrono via API do Mailtrap, com fallback para SMTP local (Mailpit)
 - **Documentação API**: Swagger/OpenAPI integrado com autenticação, com descrições e exemplos de request/response em todos os endpoints
 - **Validação de Dados**: Pipes globais de validação com class-validator
 - **Queue System**: Processamento assíncrono de tarefas com Redis
@@ -85,7 +85,7 @@ ShopixTurbo Backend é uma API RESTful desenvolvida com NestJS para integração
 | ORM             | Prisma          | ^7.5.0          |
 | Fila/Cache      | Redis + BullMQ  | 7               |
 | Documentação    | Swagger/OpenAPI | @nestjs/swagger |
-| E-mail          | Nodemailer      | ^8.0.3          |
+| E-mail          | Nodemailer + Mailtrap | ^8.0.3 + ^4.10.0 |
 | Autenticação    | JWT             | @nestjs/jwt     |
 | Validação       | class-validator | Latest          |
 | Segurança       | Helmet          | ^8.1.0          |
@@ -237,7 +237,13 @@ REDIS_URL=redis://localhost:6379
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
-# SMTP
+# Email
+# Preencha MAILTRAP_TOKEN para usar a API do Mailtrap. Sem ele, usa o SMTP local (Mailpit) abaixo.
+MAILTRAP_TOKEN=
+MAIL_FROM=hello@demomailtrap.co
+MAIL_FROM_NAME=ShopixTurbo
+
+# SMTP (fallback local) — usado apenas quando MAILTRAP_TOKEN está vazio
 SMTP_HOST=localhost
 SMTP_PORT=1025
 SMTP_USER=
@@ -288,8 +294,12 @@ GET_ESCROW_DETAIL_BATCH_PATH=/api/v2/payment/get_escrow_detail_batch
 | `REDIS_URL`                | URL completa de conexão Redis                              | `redis://localhost:6379` |
 | `REDIS_HOST`               | Host do Redis                                              | `localhost`              |
 | `REDIS_PORT`               | Porta do Redis                                             | `6379`                   |
-| **SMTP**                   |
-| `SMTP_HOST`                | Host do servidor SMTP                                      | `localhost`              |
+| **Email**                  |
+| `MAILTRAP_TOKEN`           | Token da API do Mailtrap. Se preenchido, usa a API do Mailtrap em vez de SMTP | -                        |
+| `MAIL_FROM`                | Endereço de e-mail do remetente                            | `hello@demomailtrap.co`  |
+| `MAIL_FROM_NAME`           | Nome exibido do remetente                                  | `ShopixTurbo`            |
+| **SMTP (fallback local)**  |
+| `SMTP_HOST`                | Host do servidor SMTP (fallback local/Mailpit)             | `localhost`              |
 | `SMTP_PORT`                | Porta do servidor SMTP                                     | `1025`                   |
 | `SMTP_USER`                | Usuário do SMTP                                            | -                        |
 | `SMTP_PASS`                | Senha do SMTP                                              | -                        |
@@ -527,7 +537,7 @@ O `docker-compose.yaml` inclui:
 | ---------- | --------------- | ---------- | ------------------------- |
 | `postgres` | postgres:18     | 5432       | Banco de dados            |
 | `redis`    | redis:7-alpine  | 6379       | Fila e Cache              |
-| `mailpit`  | axllent/mailpit | 1025, 8025 | Servidor SMTP para testes |
+| `mailpit`  | axllent/mailpit | 1025, 8025 | Servidor SMTP local (Mailpit) para testes — fallback quando `MAILTRAP_TOKEN` está vazio |
 
 ---
 
@@ -541,6 +551,7 @@ O projeto utiliza BullMQ com Redis para processamento assíncrono de tarefas:
 
 - **Produtor** (`mail.producer.ts`): Adiciona jobs de e-mail à fila
 - **Processador** (`mail.processor.ts`): Processa os jobs de envio de e-mail
+- O envio é feito pelo `MailService` via **API do Mailtrap** quando `MAILTRAP_TOKEN` está definido; caso contrário, usa **SMTP local (Mailpit)** como fallback. O remetente é definido por `MAIL_FROM`/`MAIL_FROM_NAME` (padrão `ShopixTurbo <hello@demomailtrap.co>`).
 
 **Products Sync Queue** (`products-sync.queue`):
 

@@ -191,6 +191,9 @@ O campo `expires_at` é usado para verificar a validade do token.
 ## 📧 Sistema de Email
 
 - Envio de email deve ocorrer via fila (NUNCA direto na request)
+- Provedor principal: API do Mailtrap via `MAILTRAP_TOKEN` (usada quando o token está preenchido)
+- Fallback local: SMTP via Mailpit (quando `MAILTRAP_TOKEN` está vazio)
+- Remetente configurado via `MAIL_FROM` (endereço) e `MAIL_FROM_NAME` (nome exibido)
 - Templates devem ser HTML responsivo
 - Tokens de verificação devem expirar
 - Implementar reenvio com segurança
