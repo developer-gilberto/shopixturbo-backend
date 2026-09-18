@@ -100,7 +100,7 @@ export class ShopsRepository {
     try {
       return await this.prismaClient.shop.findMany({
         where: { user_id: userId, deleted_at: null },
-        omit: { external_id: true }
+        omit: { external_id: true },
       });
     } catch (err) {
       this.logger.error(`Prisma: falha ao buscar shop com user_id "${userId}" \n`, err);

@@ -6,10 +6,10 @@ import { TokenPayload } from 'src/common/types/token-payload.type';
 import { constants } from 'src/configs/constants.config';
 import { Prisma } from 'src/generated/prisma/client';
 import { MailProducer } from '../mail/mail.producer';
+import { ShopsService } from '../shops/shops.service';
 import { UsersService } from '../users/users.service';
 import { SignInDTO, SignUpDTO } from './auth.dto';
 import { VerifyEmailStatus } from './verify-email-status.enum';
-import { ShopsService } from '../shops/shops.service';
 
 @Injectable()
 export class AuthService {
@@ -121,7 +121,7 @@ export class AuthService {
       throw new ForbiddenException('É necessário verificar seu email para fazer login.');
     }
 
-    const [shop] = await this.shopsService.getShopByUserId(storedUser.id)
+    const [shop] = await this.shopsService.getShopByUserId(storedUser.id);
 
     const payload = {
       id: storedUser.id,
@@ -129,7 +129,7 @@ export class AuthService {
       email: storedUser.email,
       role: storedUser.role,
       is_email_verified: storedUser.is_email_verified,
-      shop
+      shop,
     };
 
     const token = this.jwtService.sign<TokenPayload>(payload);
