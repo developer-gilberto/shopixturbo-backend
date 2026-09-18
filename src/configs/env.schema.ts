@@ -26,6 +26,7 @@ export const envSchema = z.object({
   // Redis
   REDIS_URL: z.string().min(1),
   REDIS_HOST: z.string().min(1),
+  REDIS_PASSWORD: z.string().min(1),
   REDIS_PORT: z.coerce.number().int().min(1),
 
   // SMTP (fallback local/Mailpit) — usado quando MAILTRAP_TOKEN não está definido
