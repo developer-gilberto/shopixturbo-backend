@@ -1,9 +1,14 @@
-import { BadRequestException, HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { constants } from 'src/configs/constants.config';
 import { Env } from 'src/configs/env.schema';
 import { ShopeeAuthService } from '../integrations/shopee/auth/shopee-auth.service';
 import { ShopeeTokenService } from '../integrations/shopee/token/shopee-token.service';
+import type {
+  ShopeeGetItemIdListResponse,
+  ShopeeGetItemInfoResponse,
+  ShopeeProductItem,
+} from '../products-sync/products-sync.type';
 import { GetProductFullDTO, ProductsUpdateCostAndTaxesDTO } from './products.dto';
 import { ProductsRepository } from './products.repository';
 import { CreateProductInput, GetProductList, GetProductsInfo } from './products.type';
@@ -53,34 +58,79 @@ export class ProductsService {
 
     const productsList = await response.json();
 
-    return productsList.response;
+    return this.parseShopeeResponse<ShopeeGetItemIdListResponse>(productsList, this.getProductListPath);
   }
 
   async getProductsInfo(data: GetProductsInfo) {
     const cachedTokenAndShopId = await this.shopeeTokenService.getValidAccessToken(data.userId, data.shopId);
 
-    const signedUrl = this.shopeeAuthService.generateSignedUrl({
-      path: this.getProductInfoPath,
-      accessToken: cachedTokenAndShopId.access_token,
-      shopId: Number(cachedTokenAndShopId.external_shop_id),
-    });
+    const itemList: ShopeeProductItem[] = [];
 
-    const encodeUrl = encodeURI(
-      `${signedUrl}&item_id_list=${data.itemIdList}&need_tax_info=true&need_complaint_policy=true`,
-    );
-
-    const response = await fetch(encodeUrl);
-
-    if (!response.ok) {
-      this.logger.error('API Shopee: falha ao buscar lista de produtos: \n', response);
-      throw new HttpException(`API Shopee: ${response.statusText}`, response.status, {
-        cause: new Error(response.statusText),
+    for (const chunk of this.chunkItemIdList(data.itemIdList)) {
+      const signedUrl = this.shopeeAuthService.generateSignedUrl({
+        path: this.getProductInfoPath,
+        accessToken: cachedTokenAndShopId.access_token,
+        shopId: Number(cachedTokenAndShopId.external_shop_id),
       });
+
+      const encodeUrl = encodeURI(`${signedUrl}&item_id_list=${chunk}&need_tax_info=true&need_complaint_policy=true`);
+
+      const response = await fetch(encodeUrl);
+
+      if (!response.ok) {
+        this.logger.error('API Shopee: falha ao buscar informações dos produtos: \n', response);
+        throw new HttpException(`API Shopee: ${response.statusText}`, response.status, {
+          cause: new Error(response.statusText),
+        });
+      }
+
+      const productsInfo = await response.json();
+
+      const body = this.parseShopeeResponse<ShopeeGetItemInfoResponse>(productsInfo, this.getProductInfoPath);
+
+      itemList.push(...(body.item_list ?? []));
     }
 
-    const productsInfo = await response.json();
+    return { item_list: itemList };
+  }
 
-    return productsInfo.response;
+  private parseShopeeResponse<T extends { item?: unknown[]; item_list?: unknown[] }>(
+    body: {
+      error?: string;
+      msg?: string;
+      request_id?: string;
+      response?: T;
+    },
+    endpoint: string,
+  ): T {
+    if (body.error) {
+      this.logger.error(`API Shopee (${endpoint}): ${body.error} - ${body.msg ?? 'sem mensagem'}`, body);
+      throw new HttpException(
+        `API Shopee (${endpoint}): ${body.error} - ${body.msg ?? 'sem mensagem'}${
+          body.request_id ? ` (request_id: ${body.request_id})` : ''
+        }`,
+        HttpStatus.BAD_GATEWAY,
+        { cause: new Error(body.error) },
+      );
+    }
+
+    if (body.response === undefined || body.response === null) {
+      this.logger.error(`API Shopee (${endpoint}): resposta sem o campo 'response'`, body);
+      throw new HttpException(`API Shopee (${endpoint}): resposta sem o campo 'response'.`, HttpStatus.BAD_GATEWAY);
+    }
+
+    return body.response;
+  }
+
+  private chunkItemIdList(itemIdList: number[]): number[][] {
+    const maxItemsPerChunk = constants.SHOPEE_MAX_ITEM_ID_LIST;
+    const chunks: number[][] = [];
+
+    for (let index = 0; index < itemIdList.length; index += maxItemsPerChunk) {
+      chunks.push(itemIdList.slice(index, index + maxItemsPerChunk));
+    }
+
+    return chunks;
   }
 
   async upsertBulkProducts({ shopId, products }: { shopId: string; products: CreateProductInput[] }) {

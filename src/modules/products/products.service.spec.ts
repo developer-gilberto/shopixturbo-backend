@@ -124,6 +124,27 @@ describe('ProductsService', () => {
         }),
       ).rejects.toThrow(HttpException);
     });
+
+    it('lança HttpException quando a API Shopee responde com corpo de erro (HTTP 200)', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          error: 'error_param',
+          msg: 'Request items over limit, should be less than 50',
+          request_id: 'req-1',
+        }),
+      } as never);
+
+      await expect(
+        service.getProductsList({
+          userId: 'u1',
+          shopId: 's1',
+          offset: 0,
+          page_size: 10,
+          item_status: ItemStatus.NORMAL,
+        }),
+      ).rejects.toThrow(HttpException);
+    });
   });
 
   describe('getProductsInfo', () => {
@@ -147,6 +168,52 @@ describe('ProductsService', () => {
       fetchMock.mockResolvedValue({ ok: false, statusText: 'Nope', status: 500 } as never);
 
       await expect(service.getProductsInfo({ userId: 'u1', shopId: 's1', itemIdList: [1] })).rejects.toThrow(
+        HttpException,
+      );
+    });
+
+    it('divide item_id_list em lotes e agrega o item_list de cada chamada', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue({ response: { item_list: [{ item_id: 1 }, { item_id: 2 }] } }),
+      } as never);
+
+      const ids = Array.from({ length: 100 }, (_, i) => i + 1);
+
+      const result = await service.getProductsInfo({ userId: 'u1', shopId: 's1', itemIdList: ids });
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+
+      const firstCallUrl = fetchMock.mock.calls[0][0] as string;
+      const secondCallUrl = fetchMock.mock.calls[1][0] as string;
+      const firstCallIds = firstCallUrl.match(/item_id_list=([^&]+)/)?.[1]?.split(',') ?? [];
+      const secondCallIds = secondCallUrl.match(/item_id_list=([^&]+)/)?.[1]?.split(',') ?? [];
+
+      expect(firstCallIds).toHaveLength(50);
+      expect(secondCallIds).toHaveLength(50);
+      expect(firstCallIds).toEqual(Array.from({ length: 50 }, (_, i) => String(i + 1)));
+      expect(secondCallIds).toEqual(Array.from({ length: 50 }, (_, i) => String(i + 51)));
+      expect(result).toEqual({ item_list: [{ item_id: 1 }, { item_id: 2 }, { item_id: 1 }, { item_id: 2 }] });
+    });
+
+    it('retorna item_list vazio quando a lista de item_id é vazia', async () => {
+      const result = await service.getProductsInfo({ userId: 'u1', shopId: 's1', itemIdList: [] });
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(result).toEqual({ item_list: [] });
+    });
+
+    it('lança HttpException quando a API Shopee responde com corpo de erro (HTTP 200)', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          error: 'error_param',
+          msg: 'Request items over limit, should be less than 50',
+          request_id: 'req-1',
+        }),
+      } as never);
+
+      await expect(service.getProductsInfo({ userId: 'u1', shopId: 's1', itemIdList: [1, 2] })).rejects.toThrow(
         HttpException,
       );
     });
