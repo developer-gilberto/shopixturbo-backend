@@ -110,9 +110,11 @@ export class ProductsSyncService {
           itemIdList: productIdList.item.map((product) => product.item_id),
         });
 
+        this.logger.debug({ shopId, offset, itens: products.item_list?.length }, 'Informações dos produtos obtidas');
+
         const productsToUpsert: CreateProductInput[] = [];
 
-        for (const item of products.item_list) {
+        for (const item of products.item_list ?? []) {
           const updatedAt = new Date(item.update_time * 1000);
           if (updatedAt > maxUpdatedAt) maxUpdatedAt = updatedAt;
 
